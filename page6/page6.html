@@ -1,0 +1,485 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Our Memories & One Last Thing</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Alpine.js CDN -->
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <!-- Canvas Confetti CDN (For the finale) -->
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@600;700&family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        /* Prevents the split-second flash of images before Alpine loads */
+        [x-cloak] { display: none !important; }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(135deg, #fff0f5 0%, #ffe4e1 100%);
+        }
+        .script-font {
+            font-family: 'Dancing Script', cursive;
+        }
+
+        /* EXPANDED MATHEMATICAL SIZING VARIABLES */
+        :root {
+            --gap: 6px; 
+            --max-h: calc((100vh - 130px - (3 * var(--gap))) / 4); 
+            --max-w: calc((100vw - 32px - (7 * var(--gap))) / 8.333); 
+            --h: min(var(--max-h), var(--max-w));
+        }
+        @media (min-width: 768px) {
+            :root {
+                --gap: 10px;
+            }
+        }
+
+        /* Strict Aspect Ratio Handlers */
+        .card-4x3 { height: var(--h); width: calc(var(--h) * 1.3333); }
+        .card-3x4 { height: var(--h); width: calc(var(--h) * 0.75); }
+        .center-card {
+            height: calc((var(--h) * 2) + var(--gap));
+            width: calc(((var(--h) * 2) + var(--gap)) * 0.75);
+        }
+
+        /* Polaroid Aesthetics */
+        .polaroid-card {
+            background: #ffffff;
+            border-radius: 4px;
+            box-shadow: 0 4px 10px rgba(140, 40, 80, 0.08);
+            border: 1px solid rgba(251, 207, 232, 0.8);
+            display: flex;
+            flex-direction: column;
+            padding: 4px;
+        }
+        
+        .placeholder-inner {
+            flex-grow: 1;
+            border-radius: 3px;
+            background-color: rgba(252, 231, 243, 0.3);
+            border: 1px dashed rgba(244, 114, 182, 0.4);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: #f472b6;
+        }
+
+        .page-fade-in { animation: pageFade 1.2s ease-in-out forwards; }
+        @keyframes pageFade { from { opacity: 0; } to { opacity: 1; } }
+
+        /* SLOW, ORGANIC FLOATING ANIMATIONS */
+        @keyframes floatSoftly {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-6px); }
+        }
+        .floating-element { animation: floatSoftly 6s ease-in-out infinite; }
+        div:nth-child(2n) > .floating-element { animation-duration: 7.5s; animation-delay: -2s; }
+        div:nth-child(3n) > .floating-element { animation-duration: 8.5s; animation-delay: -4s; }
+        div:nth-child(5n) > .floating-element { animation-duration: 6.5s; animation-delay: -1s; }
+        div:nth-child(7n) > .floating-element { animation-duration: 9s; animation-delay: -5s; }
+        .center-floating { animation: floatSoftly 10s ease-in-out infinite; }
+
+        /* Custom pulsing animation for the gift */
+        @keyframes gentlePulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.08); }
+        }
+        .animate-gentle-pulse { animation: gentlePulse 2s infinite ease-in-out; }
+
+        /* =========================================
+           STAGGERED FADE-IN FOR FINAL SCREEN
+        ========================================= */
+        @keyframes staggerFade {
+            0% { opacity: 0; transform: translateY(15px); }
+            100% { opacity: 1; transform: translateY(0); }
+        }
+        .stagger-item {
+            opacity: 0;
+            animation: staggerFade 3.0s ease-out forwards;
+        }
+        /* Sequence order */
+        .delay-1 { animation-delay: 1.5s; } /* Heading */
+        .delay-2 { animation-delay: 2.2s; } /* Subtitle 1 */
+        .delay-3 { animation-delay: 2.9s; } /* Subtitle 2 */
+        .delay-4 { animation-delay: 3.8s; } /* Image */
+        .delay-5 { animation-delay: 20.0s; } /* Replay Button */
+
+        /* --- NEW GIFT BOX ANIMATIONS --- */
+        @keyframes floatingGlow {
+            0%, 100% { box-shadow: 0 0 20px rgba(251,74,117,0.2); transform: scale(1); }
+            50% { box-shadow: 0 0 50px rgba(251,74,117,0.6); transform: scale(1.05); }
+        }
+        @keyframes wiggle {
+            0%, 100% { transform: rotate(0deg); }
+            25% { transform: rotate(-10deg) scale(1.1); }
+            50% { transform: rotate(10deg) scale(1.1); }
+            75% { transform: rotate(-5deg) scale(1.1); }
+        }
+        
+        .gift-wrapper {
+            position: relative;
+            display: inline-flex;
+            justify-content: center;
+            align-items: center;
+            width: 160px;
+            height: 160px;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(253, 232, 243, 0.9) 0%, rgba(255,255,255,0) 70%);
+            animation: floatingGlow 3s infinite ease-in-out;
+            transition: all 0.3s ease;
+        }
+        
+        .gift-emoji {
+            font-size: 100px;
+            filter: drop-shadow(0 15px 25px rgba(251,74,117,0.4));
+            transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            line-height: 1;
+        }
+        
+        @media (min-width: 640px) {
+            .gift-wrapper { width: 220px; height: 220px; }
+            .gift-emoji { font-size: 130px; }
+        }
+        
+        .gift-btn:hover .gift-wrapper {
+            background: radial-gradient(circle, rgba(251, 168, 200, 0.8) 0%, rgba(255,255,255,0) 70%);
+        }
+        
+        .gift-btn:hover .gift-emoji {
+            animation: wiggle 0.6s ease-in-out infinite;
+        }
+    </style>
+</head>
+
+<body class="h-screen w-screen overflow-hidden flex flex-col page-fade-in text-gray-700 relative" x-data="appState()" x-cloak>
+
+    <!-- Persistent Background Audio -->
+    <audio id="bgm" src="../assets/audio/Final_bgm.mpeg" preload="auto"></audio>
+
+    <!-- Global Header Navigation -->
+    <header class="absolute top-4 left-0 right-0 w-full max-w-7xl mx-auto flex justify-between items-center px-4 sm:px-8 z-50">
+        
+        <!-- Simplified Back Button -->
+        <span @click="history.back()" class="text-pink-400 text-2xl cursor-pointer transition-transform hover:scale-125 z-50">
+            &larr;
+        </span>
+        
+        <!-- Dynamic Header Title -->
+        <h1 x-show="currentView === 'collage'" x-transition class="script-font text-2xl sm:text-4xl font-bold text-pink-600 drop-shadow-sm absolute left-1/2 -translate-x-1/2">
+            Our Memories...
+        </h1>
+        
+        <!-- Invisible spacer to keep the title perfectly centered -->
+        <div class="w-6 sm:w-8"></div>
+        
+    </header>
+
+    <!-- ================= VIEW 1: THE PHOTO COLLAGE ================= -->
+    <div x-show="currentView === 'collage'"
+         x-transition:leave="transition ease-in-out duration-1000"
+         x-transition:leave-start="opacity-100 scale-100"
+         x-transition:leave-end="opacity-0 scale-95"
+         class="absolute inset-0 w-full h-full flex flex-col pt-16 sm:pt-20 pb-4 px-2 sm:px-4 z-20">
+        
+        <main class="w-full flex-grow flex flex-col items-center justify-center relative">
+            <div class="flex flex-col" style="gap: var(--gap); width: max-content; max-width: 100%;">
+                
+                <!-- ROW 1 (Top) -->
+                <div class="flex justify-between w-full" style="gap: var(--gap);">
+                    <div class="card-4x3"><div class="w-full h-full floating-element transition-opacity duration-[2500ms] ease-in-out" :class="visibleItems.includes(1) ? 'opacity-100' : 'opacity-0 pointer-events-none'"><div class="polaroid-card w-full h-full transform hover:scale-[1.03] transition-transform duration-300"><img src="../assets/collage/photo1.jpeg" class="w-full h-full object-cover rounded-[3px]" alt="Memory 1"></div></div></div>
+                    <div class="card-3x4"><div class="w-full h-full floating-element transition-opacity duration-[2500ms] ease-in-out" :class="visibleItems.includes(2) ? 'opacity-100' : 'opacity-0 pointer-events-none'"><div class="polaroid-card w-full h-full transform hover:scale-[1.03] transition-transform duration-300"><img src="../assets/collage/photo2.jpeg" class="w-full h-full object-cover rounded-[3px]" alt="Memory 2"></div></div></div>
+                    <div class="card-4x3"><div class="w-full h-full floating-element transition-opacity duration-[2500ms] ease-in-out" :class="visibleItems.includes(3) ? 'opacity-100' : 'opacity-0 pointer-events-none'"><div class="polaroid-card w-full h-full transform hover:scale-[1.03] transition-transform duration-300"><img src="../assets/collage/photo3.jpeg" class="w-full h-full object-cover rounded-[3px]" alt="Memory 3"></div></div></div>
+                    <div class="card-3x4"><div class="w-full h-full floating-element transition-opacity duration-[2500ms] ease-in-out" :class="visibleItems.includes(4) ? 'opacity-100' : 'opacity-0 pointer-events-none'"><div class="polaroid-card w-full h-full transform hover:scale-[1.03] transition-transform duration-300"><img src="../assets/collage/photo4.jpeg" class="w-full h-full object-cover rounded-[3px]" alt="Memory 4"></div></div></div>
+                    <div class="card-3x4"><div class="w-full h-full floating-element transition-opacity duration-[2500ms] ease-in-out" :class="visibleItems.includes(5) ? 'opacity-100' : 'opacity-0 pointer-events-none'"><div class="polaroid-card w-full h-full transform hover:scale-[1.03] transition-transform duration-300"><img src="../assets/collage/photo5.jpeg" class="w-full h-full object-cover rounded-[3px]" alt="Memory 5"></div></div></div>
+                    <div class="card-4x3"><div class="w-full h-full floating-element transition-opacity duration-[2500ms] ease-in-out" :class="visibleItems.includes(6) ? 'opacity-100' : 'opacity-0 pointer-events-none'"><div class="polaroid-card w-full h-full transform hover:scale-[1.03] transition-transform duration-300"><img src="../assets/collage/photo6.jpeg" class="w-full h-full object-cover rounded-[3px]" alt="Memory 6"></div></div></div>
+                    <div class="card-3x4"><div class="w-full h-full floating-element transition-opacity duration-[2500ms] ease-in-out" :class="visibleItems.includes(7) ? 'opacity-100' : 'opacity-0 pointer-events-none'"><div class="polaroid-card w-full h-full transform hover:scale-[1.03] transition-transform duration-300"><img src="../assets/collage/photo7.jpeg" class="w-full h-full object-cover rounded-[3px]" alt="Memory 7"></div></div></div>
+                    <div class="card-4x3"><div class="w-full h-full floating-element transition-opacity duration-[2500ms] ease-in-out" :class="visibleItems.includes(8) ? 'opacity-100' : 'opacity-0 pointer-events-none'"><div class="polaroid-card w-full h-full transform hover:scale-[1.03] transition-transform duration-300"><img src="../assets/collage/photo8.jpeg" class="w-full h-full object-cover rounded-[3px]" alt="Memory 8"></div></div></div>
+                </div>
+
+                <!-- MIDDLE SECTION -->
+                <div class="flex justify-between w-full">
+                    <!-- Left Block -->
+                    <div class="flex flex-col" style="gap: var(--gap);">
+                        <div class="flex" style="gap: var(--gap);">
+                            <div class="card-3x4"><div class="w-full h-full floating-element transition-opacity duration-[2500ms] ease-in-out" :class="visibleItems.includes(9) ? 'opacity-100' : 'opacity-0 pointer-events-none'"><div class="polaroid-card w-full h-full transform hover:scale-[1.03] transition-transform duration-300"><img src="../assets/collage/photo9.jpeg" class="w-full h-full object-cover rounded-[3px]" alt="Memory 9"></div></div></div>
+                            <div class="card-4x3"><div class="w-full h-full floating-element transition-opacity duration-[2500ms] ease-in-out" :class="visibleItems.includes(10) ? 'opacity-100' : 'opacity-0 pointer-events-none'"><div class="polaroid-card w-full h-full transform hover:scale-[1.03] transition-transform duration-300"><img src="../assets/collage/photo10.jpeg" class="w-full h-full object-cover rounded-[3px]" alt="Memory 10"></div></div></div>
+                            <div class="card-4x3"><div class="w-full h-full floating-element transition-opacity duration-[2500ms] ease-in-out" :class="visibleItems.includes(11) ? 'opacity-100' : 'opacity-0 pointer-events-none'"><div class="polaroid-card w-full h-full transform hover:scale-[1.03] transition-transform duration-300"><img src="../assets/collage/photo11.jpeg" class="w-full h-full object-cover rounded-[3px]" alt="Memory 11"></div></div></div>
+                        </div>
+                        <div class="flex" style="gap: var(--gap);">
+                            <div class="card-4x3"><div class="w-full h-full floating-element transition-opacity duration-[2500ms] ease-in-out" :class="visibleItems.includes(12) ? 'opacity-100' : 'opacity-0 pointer-events-none'"><div class="polaroid-card w-full h-full transform hover:scale-[1.03] transition-transform duration-300"><img src="../assets/collage/photo12.jpeg" class="w-full h-full object-cover rounded-[3px]" alt="Memory 12"></div></div></div>
+                            <div class="card-4x3"><div class="w-full h-full floating-element transition-opacity duration-[2500ms] ease-in-out" :class="visibleItems.includes(13) ? 'opacity-100' : 'opacity-0 pointer-events-none'"><div class="polaroid-card w-full h-full transform hover:scale-[1.03] transition-transform duration-300"><img src="../assets/collage/photo13.jpeg" class="w-full h-full object-cover rounded-[3px]" alt="Memory 13"></div></div></div>
+                            <div class="card-3x4"><div class="w-full h-full floating-element transition-opacity duration-[2500ms] ease-in-out" :class="visibleItems.includes(14) ? 'opacity-100' : 'opacity-0 pointer-events-none'"><div class="polaroid-card w-full h-full transform hover:scale-[1.03] transition-transform duration-300"><img src="../assets/collage/photo14.jpeg" class="w-full h-full object-cover rounded-[3px]" alt="Memory 14"></div></div></div>
+                        </div>
+                    </div>
+
+                   <!-- THE CENTER WISH CARD (Image Only) -->
+                    <div class="center-card z-20 hover:scale-[1.02] hover:z-30 transition-transform duration-500 rounded-lg shadow-[0_15px_30px_rgba(251,74,117,0.35)] center-floating overflow-hidden">
+                        <img src="../assets/images/wish.jpeg" class="w-full h-full object-cover" alt="Favorite Memory">
+                    </div>
+
+                    <!-- Right Block -->
+                    <div class="flex flex-col" style="gap: var(--gap);">
+                        <div class="flex" style="gap: var(--gap);">
+                            <div class="card-4x3"><div class="w-full h-full floating-element transition-opacity duration-[2500ms] ease-in-out" :class="visibleItems.includes(15) ? 'opacity-100' : 'opacity-0 pointer-events-none'"><div class="polaroid-card w-full h-full transform hover:scale-[1.03] transition-transform duration-300"><img src="../assets/collage/photo15.jpeg" class="w-full h-full object-cover rounded-[3px]" alt="Memory 15"></div></div></div>
+                            <div class="card-4x3"><div class="w-full h-full floating-element transition-opacity duration-[2500ms] ease-in-out" :class="visibleItems.includes(16) ? 'opacity-100' : 'opacity-0 pointer-events-none'"><div class="polaroid-card w-full h-full transform hover:scale-[1.03] transition-transform duration-300"><img src="../assets/collage/photo16.jpeg" class="w-full h-full object-cover rounded-[3px]" alt="Memory 16"></div></div></div>
+                            <div class="card-3x4"><div class="w-full h-full floating-element transition-opacity duration-[2500ms] ease-in-out" :class="visibleItems.includes(17) ? 'opacity-100' : 'opacity-0 pointer-events-none'"><div class="polaroid-card w-full h-full transform hover:scale-[1.03] transition-transform duration-300"><img src="../assets/collage/photo17.jpeg" class="w-full h-full object-cover rounded-[3px]" alt="Memory 17"></div></div></div>
+                        </div>
+                        <div class="flex" style="gap: var(--gap);">
+                            <div class="card-3x4"><div class="w-full h-full floating-element transition-opacity duration-[2500ms] ease-in-out" :class="visibleItems.includes(18) ? 'opacity-100' : 'opacity-0 pointer-events-none'"><div class="polaroid-card w-full h-full transform hover:scale-[1.03] transition-transform duration-300"><img src="../assets/collage/photo18.jpeg" class="w-full h-full object-cover rounded-[3px]" alt="Memory 18"></div></div></div>
+                            <div class="card-4x3"><div class="w-full h-full floating-element transition-opacity duration-[2500ms] ease-in-out" :class="visibleItems.includes(19) ? 'opacity-100' : 'opacity-0 pointer-events-none'"><div class="polaroid-card w-full h-full transform hover:scale-[1.03] transition-transform duration-300"><img src="../assets/collage/photo19.jpeg" class="w-full h-full object-cover rounded-[3px]" alt="Memory 19"></div></div></div>
+                            <div class="card-4x3"><div class="w-full h-full floating-element transition-opacity duration-[2500ms] ease-in-out" :class="visibleItems.includes(20) ? 'opacity-100' : 'opacity-0 pointer-events-none'"><div class="polaroid-card w-full h-full transform hover:scale-[1.03] transition-transform duration-300"><img src="../assets/collage/photo20.jpeg" class="w-full h-full object-cover rounded-[3px]" alt="Memory 20"></div></div></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ROW 3 (Bottom) -->
+                <div class="flex justify-between w-full" style="gap: var(--gap);">
+                    <div class="card-3x4"><div class="w-full h-full floating-element transition-opacity duration-[2500ms] ease-in-out" :class="visibleItems.includes(21) ? 'opacity-100' : 'opacity-0 pointer-events-none'"><div class="polaroid-card w-full h-full transform hover:scale-[1.03] transition-transform duration-300"><img src="../assets/collage/photo21.jpeg" class="w-full h-full object-cover rounded-[3px]" alt="Memory 21"></div></div></div>
+                    <div class="card-4x3"><div class="w-full h-full floating-element transition-opacity duration-[2500ms] ease-in-out" :class="visibleItems.includes(22) ? 'opacity-100' : 'opacity-0 pointer-events-none'"><div class="polaroid-card w-full h-full transform hover:scale-[1.03] transition-transform duration-300"><img src="../assets/collage/photo22.jpeg" class="w-full h-full object-cover rounded-[3px]" alt="Memory 22"></div></div></div>
+                    <div class="card-3x4"><div class="w-full h-full floating-element transition-opacity duration-[2500ms] ease-in-out" :class="visibleItems.includes(23) ? 'opacity-100' : 'opacity-0 pointer-events-none'"><div class="polaroid-card w-full h-full transform hover:scale-[1.03] transition-transform duration-300"><img src="../assets/collage/photo23.jpeg" class="w-full h-full object-cover rounded-[3px]" alt="Memory 23"></div></div></div>
+                    <div class="card-4x3"><div class="w-full h-full floating-element transition-opacity duration-[2500ms] ease-in-out" :class="visibleItems.includes(24) ? 'opacity-100' : 'opacity-0 pointer-events-none'"><div class="polaroid-card w-full h-full transform hover:scale-[1.03] transition-transform duration-300"><img src="../assets/collage/photo24.jpeg" class="w-full h-full object-cover rounded-[3px]" alt="Memory 24"></div></div></div>
+                    <div class="card-4x3"><div class="w-full h-full floating-element transition-opacity duration-[2500ms] ease-in-out" :class="visibleItems.includes(25) ? 'opacity-100' : 'opacity-0 pointer-events-none'"><div class="polaroid-card w-full h-full transform hover:scale-[1.03] transition-transform duration-300"><img src="../assets/collage/photo25.jpeg" class="w-full h-full object-cover rounded-[3px]" alt="Memory 25"></div></div></div>
+                    <div class="card-3x4"><div class="w-full h-full floating-element transition-opacity duration-[2500ms] ease-in-out" :class="visibleItems.includes(26) ? 'opacity-100' : 'opacity-0 pointer-events-none'"><div class="polaroid-card w-full h-full transform hover:scale-[1.03] transition-transform duration-300"><img src="../assets/collage/photo26.jpeg" class="w-full h-full object-cover rounded-[3px]" alt="Memory 26"></div></div></div>
+                    <div class="card-4x3"><div class="w-full h-full floating-element transition-opacity duration-[2500ms] ease-in-out" :class="visibleItems.includes(27) ? 'opacity-100' : 'opacity-0 pointer-events-none'"><div class="polaroid-card w-full h-full transform hover:scale-[1.03] transition-transform duration-300"><img src="../assets/collage/photo27.jpeg" class="w-full h-full object-cover rounded-[3px]" alt="Memory 27"></div></div></div>
+                    <div class="card-3x4"><div class="w-full h-full floating-element transition-opacity duration-[2500ms] ease-in-out" :class="visibleItems.includes(28) ? 'opacity-100' : 'opacity-0 pointer-events-none'"><div class="polaroid-card w-full h-full transform hover:scale-[1.03] transition-transform duration-300"><img src="../assets/collage/photo28.jpeg" class="w-full h-full object-cover rounded-[3px]" alt="Memory 28"></div></div></div>
+                </div>
+
+            </div>
+        </main>
+    </div>
+
+    <!-- ================= VIEW 2: THE FINALE GIFT ================= -->
+    <div x-show="currentView === 'finale'" 
+         style="display: none;"
+         x-transition:enter="transition ease-out duration-[1200ms] delay-700"
+         x-transition:enter-start="opacity-0 translate-y-10 scale-95"
+         x-transition:enter-end="opacity-100 translate-y-0 scale-100"
+         class="absolute inset-0 w-full h-full flex flex-col items-center justify-start sm:justify-center pt-16 z-30 pointer-events-none overflow-y-auto">
+         
+         <div class="w-full max-w-5xl px-4 flex flex-col items-center justify-center relative pointer-events-auto min-h-full pb-16">
+            
+            <!-- STATE 2.1: THE UNOPENED GIFT -->
+            <div x-show="!giftOpened" 
+                 x-transition:leave="transition ease-in duration-500"
+                 x-transition:leave-start="opacity-100 scale-100"
+                 x-transition:leave-end="opacity-0 scale-90"
+                 class="flex flex-col items-center text-center w-full absolute top-1/2 -translate-y-1/2">
+                
+                <h1 class="script-font text-5xl sm:text-[64px] font-bold text-pink-600 drop-shadow-md mb-2">
+                    One Last Thing... ✨
+                </h1>
+                <p class="text-sm sm:text-lg text-pink-400 font-medium tracking-wide mb-12 max-w-md">
+                    A tiny token of love, just for you
+                </p>
+                
+                <button @click="openGift()" class="gift-btn focus:outline-none flex flex-col items-center group">
+                    <div class="gift-wrapper">
+                        <div class="gift-emoji">🎁</div>
+                    </div>
+                    <span class="mt-6 text-xs sm:text-sm font-bold text-pink-300 uppercase tracking-widest animate-pulse group-hover:text-pink-500 transition-colors">
+                        Tap to unwrap
+                    </span>
+                </button>
+            </div>
+
+            <!-- STATE 2.2: THE FINAL MESSAGE (TWO-COLUMN LAYOUT) -->
+            <div x-show="giftOpened" 
+                 style="display: none;"
+                 class="flex flex-col md:flex-row items-center md:items-stretch justify-center gap-8 md:gap-12 w-full mt-4 sm:mt-0">
+                
+                <!-- LEFT COLUMN: Image, Heading, Replay Button -->
+                <div class="flex flex-col items-center md:items-start text-center md:text-left w-full md:w-5/12 flex-shrink-0">
+                    
+                    <!-- Tilted Image Container (Appears 1st) -->
+                    <div class="relative w-44 sm:w-52 h-auto mb-6 bg-white p-2.5 sm:p-3 rounded-2xl shadow-[0_15px_40px_rgba(251,74,117,0.15)] transform -rotate-3 stagger-item delay-1">
+                        <img src="../assets/images/lastpage.jpeg" alt="Cute Hug" class="w-full h-auto rounded-xl">
+                        <!-- Top Right Heart Badge -->
+                        <div class="absolute -top-3 -right-3 w-10 h-10 sm:w-12 sm:h-12 bg-gradient-to-tr from-rose-500 to-pink-500 rounded-full flex items-center justify-center shadow-lg text-white text-lg sm:text-2xl transform hover:scale-110 transition-transform">
+                            ♥
+                        </div>
+                    </div>
+
+                    <!-- Main Heading (Appears 2nd) -->
+                    <h1 class="script-font text-4xl sm:text-[48px] font-bold text-pink-600 drop-shadow-sm mb-2 stagger-item delay-2 flex flex-col md:flex-row items-center md:items-start gap-2 leading-tight">
+                        Wishing you a day as fabulous as you are ! <span class="text-3xl text-rose-500 animate-pulse mt-1 md:mt-0 md:ml-2">♥</span>
+                    </h1>
+                    
+                    <!-- Subheading (Appears 3rd) -->
+                    <p class="text-sm sm:text-base text-gray-500 italic font-medium mb-8 stagger-item delay-3">
+                        I hope you felt my heart in every single part of this screen, softly whispering just how irreplaceable, precious, and endlessly treasured you are to me.
+                    </p>
+
+                    <!-- Desktop Replay Button (Appears 5th, hidden on mobile) -->
+                    <button @click="window.location.href='../home/index.html'" class="hidden md:flex items-center gap-2 bg-white border border-pink-200 text-pink-400 hover:text-white hover:bg-pink-400 transition-all duration-300 text-sm tracking-wide font-medium px-6 py-2.5 rounded-full shadow-md hover:shadow-lg stagger-item delay-5 mt-auto">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
+                        Replay
+                    </button>
+                </div>
+
+                <!-- RIGHT COLUMN: The Letter -->
+                <div class="w-full md:w-7/12 flex flex-col justify-center stagger-item delay-4">
+                    <div class="w-full bg-white/60 backdrop-blur-sm border border-pink-100 rounded-[28px] p-6 sm:p-8 shadow-xl shadow-pink-900/5 text-left relative overflow-hidden">
+                        
+                        <!-- Decorative Quote Mark -->
+                        <div class="absolute top-0 right-0 p-4 opacity-10 text-pink-400 text-6xl script-font pointer-events-none">"</div>
+                        
+                        <!-- Salutation -->
+                        <p class="script-font text-2xl sm:text-3xl text-pink-500 font-bold mb-4">
+                            My Dear Cutiepie,
+                        </p>
+                        
+                        <!-- Body Paragraphs -->
+                        <div class="text-[13px] sm:text-[15px] text-gray-700 leading-relaxed space-y-4 font-medium">
+                            <p>
+                                Today is a beautiful reminder of how lucky I am to have someone as amazing as you in my life. You bring so much happiness, warmth, and positivity simply by being yourself.
+                            </p>
+                            <p>
+                                Over the time, so many wonderful memories and little moments have found a special place in my heart. No matter where life takes us, I will always cherish these moments and be grateful to have you in my life.
+                            </p>
+                            <p>
+                                I hope your day is filled with love, laughter, happiness, and everything that makes you smile.
+                            </p>
+                        </div>
+                        
+                        <!-- Sign-off -->
+                        <p class="script-font text-xl sm:text-2xl text-pink-500 font-bold mt-6 text-right">
+                            Happy Birthday, Sreeja ❤️<br>
+                            <!-- <span class="text-xs sm:text-sm text-gray-500 font-sans italic font-normal tracking-wide mt-1 inline-block"> </span> -->
+                        </p>
+                    </div>
+
+                    <!-- Mobile Replay Button (Appears 5th, beneath the letter on small screens) -->
+                    <button @click="window.location.href='../home/index.html'" class="md:hidden flex items-center justify-center mx-auto gap-2 bg-white border border-pink-200 text-pink-400 hover:text-white hover:bg-pink-400 transition-all duration-300 text-sm tracking-wide font-medium px-6 py-2.5 rounded-full shadow-md hover:shadow-lg stagger-item delay-5 mt-8">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
+                        Replay
+                    </button>
+                </div>
+            </div>
+
+         </div>
+    </div>
+
+    <!-- JS Logic Control via Alpine.js -->
+    <script>
+        function appState() {
+            return {
+                currentView: 'collage', 
+                visibleItems: [], 
+                randomSequence: [], 
+                isMusicPlaying: false,
+                giftOpened: false,
+                
+                init() {
+                    const audio = document.getElementById('bgm');
+                    
+                    audio.currentTime = 0;
+                    localStorage.setItem('bgm_time', '0');
+
+                    setInterval(() => {
+                        if (!audio.paused) {
+                            localStorage.setItem('bgm_time', audio.currentTime);
+                            localStorage.setItem('bgm_playing', 'true');
+                        }
+                    }, 1000);
+
+                    let arr = [];
+                    for(let i = 1; i <= 28; i++) {
+                        arr.push(i);
+                    }
+                    for (let i = arr.length - 1; i > 0; i--) {
+                        const j = Math.floor(Math.random() * (i + 1));
+                        [arr[i], arr[j]] = [arr[j], arr[i]];
+                    }
+                    this.randomSequence = arr;
+
+                    setTimeout(() => {
+                        audio.play().then(() => {
+                            this.isMusicPlaying = true;
+                            localStorage.setItem('bgm_playing', 'true');
+                        }).catch(e => {
+                            console.log("Autoplay waiting for user interaction fallback.");
+                            const unlockAudio = () => {
+                                audio.play().then(() => {
+                                    this.isMusicPlaying = true;
+                                    localStorage.setItem('bgm_playing', 'true');
+                                });
+                                window.removeEventListener('click', unlockAudio);
+                                window.removeEventListener('touchstart', unlockAudio);
+                            };
+                            window.addEventListener('click', unlockAudio);
+                            window.addEventListener('touchstart', unlockAudio);
+                        });
+
+                        this.revealNextImage();
+                    }, 2000);
+                },
+
+                toggleMusic() {
+                    const audio = document.getElementById('bgm');
+                    if (audio.paused) {
+                        audio.play();
+                        this.isMusicPlaying = true;
+                        localStorage.setItem('bgm_playing', 'true');
+                    } else {
+                        audio.pause();
+                        this.isMusicPlaying = false;
+                        localStorage.setItem('bgm_playing', 'false');
+                    }
+                },
+                
+                revealNextImage() {
+                    if (this.randomSequence.length > 0) {
+                        let nextImageId = this.randomSequence.shift();
+                        this.visibleItems.push(nextImageId);
+                        
+                        setTimeout(() => {
+                            this.revealNextImage();
+                        }, 2300); 
+                    } else {
+                        setTimeout(() => {
+                            this.transitionToFinale();
+                        }, 2000); // 2 second delay before the final gift box screen
+                    }
+                },
+
+                transitionToFinale() {
+                    this.currentView = 'finale';
+                },
+
+                openGift() {
+                    this.giftOpened = true;
+                    this.fireConfetti();
+                },
+
+                fireConfetti() {
+                    const duration = 4000;
+                    const end = Date.now() + duration;
+
+                    (function frame() {
+                        confetti({
+                            particleCount: 4, angle: 60, spread: 55, origin: { x: 0, y: 0.8 },
+                            colors: ['#f472b6', '#fb7185', '#fbcfe8', '#ffffff'], disableForReducedMotion: true
+                        });
+                        confetti({
+                            particleCount: 4, angle: 120, spread: 55, origin: { x: 1, y: 0.8 },
+                            colors: ['#f472b6', '#fb7185', '#fbcfe8', '#ffffff'], disableForReducedMotion: true
+                        });
+                        confetti({
+                            particleCount: 2, angle: 270, spread: 120, origin: { x: 0.5, y: -0.1 },
+                            colors: ['#f472b6', '#fb7185', '#fbcfe8', '#ffffff'], startVelocity: 20, gravity: 0.5, disableForReducedMotion: true
+                        });
+
+                        if (Date.now() < end) {
+                            requestAnimationFrame(frame);
+                        }
+                    }());
+                }
+            }
+        }
+    </script>
+</body>
+</html>

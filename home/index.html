@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Happy Birthday, Sreeja! ❤️</title>
+    <!-- Google Fonts: Dancing Script -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@500;700&family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
+    <!-- Path to style.css inside the same home folder -->
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <!-- Cinematic Fade Transition Overlay -->
+    <div id="transitionOverlay" class="transition-overlay"></div>
+
+    <!-- Small Audio Control Button in Top Right Corner -->
+    <button id="audioControlBtn" class="audio-toggle-btn" title="Toggle Music">
+        🔇
+    </button>
+
+    <!-- Audio Elements (fixed with forward slashes) -->
+    <audio id="bgMusic">
+        <source src="../assets/audio/Welcome_page_bgm.mpeg" type="audio/mpeg">
+    </audio>
+    <audio id="celebrationAudio">
+        <!-- If possible, rename your file to 'Accha_ji_homepage2.mpeg' to remove the space, or keep %20 -->
+        <source src="../assets/audio/Accha_ji_homepage2.mpeg" type="audio/mpeg">
+    </audio>
+
+    <!-- Sparkle, Glitter & Ribbon Sprinkle Container -->
+    <div class="confetti-container" id="confettiContainer"></div>
+
+    <div class="main-card">
+        <!-- Title -->
+        <h1 class="title">
+            Happy Birthday, Sreeja <span class="heart">❤️</span>
+        </h1>
+
+        <!-- Illustration (fixed with forward slashes) -->
+        <div class="illustration-container">
+            <img src="../assets/images/Homepage.png" alt="Special Memory" class="birthday-gif">
+        </div>
+
+        <!-- Description -->
+        <p class="description">
+            This surprise was built on caffeine, love, and way too many hours fixing CSS bugs just to make you smile for five seconds. Ready to see if it worked?
+        </p>
+
+        <!-- Buttons -->
+        <div class="btn-group">
+            <button id="yesBtn" class="btn yes-btn">Yes</button>
+            <button id="noBtn" class="btn no-btn">No</button>
+        </div>
+    </div>
+
+    <!-- Path to main.js inside the same home folder -->
+    <script src="main.js"></script>
+</body>
+</html>

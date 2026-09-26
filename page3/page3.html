@@ -1,0 +1,895 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pop the Balloons — for Sreeja</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;0,700;1,500&family=Caveat:wght@500;600&family=Quicksand:wght@400;500;600&display=swap');
+
+  :root{
+    --bg-1: #fff5f7;
+    --bg-2: #ffe9ef;
+    --rose: #e8437a;
+    --rose-deep: #c72a5e;
+    --plum: #8a4a6b;
+    --ink: #4a3245;
+    --card: #ffffff;
+  }
+
+  *{ box-sizing: border-box; }
+
+  html, body{
+    margin:0; padding:0;
+    height:100vh;
+    width:100vw;
+    font-family:'Quicksand', sans-serif;
+    color: var(--ink);
+    overflow:hidden;
+    background: radial-gradient(circle at 30% 20%, #fff9fa 0%, var(--bg-1) 45%, var(--bg-2) 100%);
+  }
+
+  /* Smooth page transition from Page 2 */
+  body {
+    opacity: 0;
+    transition: opacity 1.2s ease-in-out;
+  }
+  body.loaded {
+    opacity: 1;
+  }
+
+  /* ---------- Loading Screen ---------- */
+  #loader{
+    position:fixed; inset:0;
+    display:flex; align-items:center; justify-content:center;
+    background: radial-gradient(circle at 50% 40%, #fff8f9 0%, var(--bg-2) 100%);
+    z-index: 999;
+    transition: opacity 0.9s ease, visibility 0.9s ease;
+  }
+  #loader.hidden{ opacity:0; visibility:hidden; pointer-events:none; }
+  .loader-balloon{
+    width:56px; height:68px;
+    border-radius:50% 50% 50% 50% / 55% 55% 45% 45%;
+    background: radial-gradient(circle at 30% 25%, #ffb6cf, var(--rose));
+    animation: loaderBob 1s ease-in-out infinite alternate;
+    position:relative;
+    box-shadow: 0 10px 25px rgba(232,67,122,0.25);
+  }
+  @keyframes loaderBob{
+    from{ transform: translateY(0) scale(1); }
+    to{ transform: translateY(-14px) scale(1.03); }
+  }
+
+  /* ---------- Magic Sparkle Transition ---------- */
+  .magic-star {
+    position: absolute;
+    clip-path: polygon(50% 0%, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%);
+    animation: magicTwinkle 1.8s ease-out forwards;
+    filter: drop-shadow(0 0 8px rgba(255, 255, 255, 0.8));
+    opacity: 0;
+  }
+
+  @keyframes magicTwinkle {
+    0%   { transform: scale(0) rotate(0deg); opacity: 0; }
+    20%  { transform: scale(1.2) rotate(45deg); opacity: 1; }
+    50%  { transform: scale(0.8) rotate(90deg); opacity: 0.8; }
+    100% { transform: scale(0) rotate(180deg) translateY(60px); opacity: 0; }
+  }
+
+  /* ---------- Layout ---------- */
+  .stage{
+    position:relative;
+    height:100vh;
+    width:100%;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    gap: clamp(8px, 2vh, 22px);
+    padding: 14px 16px;
+    overflow:hidden;
+    opacity:0;
+    transform: translateY(14px);
+    transition: opacity 1s ease, transform 1s ease;
+    z-index: 1;
+  }
+  .stage.reveal{ opacity:1; transform:none; }
+
+  .topbar{
+    position:fixed; top:20px; left:20px; right:20px;
+    display:flex; justify-content:space-between;
+    z-index: 60; 
+  }
+  .icon-btn{
+    width:44px; height:44px; border-radius:50%;
+    background: rgba(255,255,255,0.85);
+    border: none;
+    display:flex; align-items:center; justify-content:center;
+    box-shadow: 0 4px 14px rgba(199,42,94,0.12);
+    cursor:pointer;
+    font-size:18px;
+    color: var(--plum);
+    transition: transform 0.25s ease, box-shadow 0.25s ease;
+  }
+  .icon-btn:hover{ transform: translateY(-2px); box-shadow: 0 8px 18px rgba(199,42,94,0.18); }
+  .icon-btn:focus-visible{ outline: 3px solid var(--rose); outline-offset: 2px; }
+  .icon-btn.hidden-btn{ display:none; }
+
+  .arrow-btn-top{
+    background: none;
+    border: none;
+    padding: 4px;
+    font-size: 1.9rem;
+    line-height: 1;
+    color: #f472b6;
+    cursor: pointer;
+    transition: transform 0.2s ease;
+  }
+  .arrow-btn-top:hover{ transform: scale(1.25); }
+  .arrow-btn-top:focus-visible{ outline: 3px solid var(--rose); outline-offset: 2px; }
+
+  .heading-block{
+    text-align:center;
+    max-width: 900px;
+    margin: 0;
+  }
+  .eyebrow{
+    font-family:'Caveat', cursive;
+    font-size: clamp(1.15rem, 3vh, 2.2rem);
+    color: var(--rose);
+    margin: 0 0 4px;
+    opacity:0;
+    animation: fadeUp 0.8s ease forwards 0.15s;
+  }
+  h1{
+    font-family:'Playfair Display', serif;
+    font-weight:700;
+    font-size: clamp(2.6rem, min(9vh, 9.5vw), 6.4rem);
+    color: var(--rose-deep);
+    margin: 4px 0 8px;
+    letter-spacing: 0.5px;
+    line-height: 1.05;
+    opacity:0;
+    animation: fadeUp 0.9s ease forwards 0.3s;
+  }
+  .subline{
+    font-family:'Caveat', cursive;
+    font-size: clamp(1.3rem, 3.3vh, 2.3rem);
+    color: var(--plum);
+    margin:0;
+    opacity:0;
+    animation: fadeUp 0.9s ease forwards 0.45s;
+  }
+
+  @keyframes fadeUp{
+    from{ opacity:0; transform: translateY(16px); }
+    to{ opacity:1; transform: translateY(0); }
+  }
+
+  /* ---------- Center GIF Placeholder ---------- */
+  .center-gif-container {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    /* Positioned perfectly in the center gap created by the staggered cards */
+    transform: translate(-50%, -40%) scale(0.7); 
+    width: 240px;
+    height: 240px;
+    border-radius: 20px;
+    overflow: hidden;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 1.2s ease, transform 1.2s ease, visibility 1.2s ease;
+    z-index: 5;
+    box-shadow: 0 15px 35px rgba(140, 40, 80, 0.15);
+  }
+  .center-gif-container.show {
+    opacity: 1;
+    visibility: visible;
+    transform: translate(-50%, -40%) scale(1);
+  }
+  .center-gif-container img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  /* ---------- Balloon Grid ---------- */
+  .field{
+    position:relative;
+    width:100%;
+    max-width: 680px;
+    margin-top: 0;
+    flex: 1 1 0;
+    min-height: 0;
+    display:grid;
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: 1fr 1fr;
+    row-gap: clamp(12px, 3vh, 50px);
+    column-gap: clamp(24px, 6vw, 56px);
+    justify-items:center;
+    align-items:center;
+    z-index: 10;
+  }
+
+  .balloon-wrap{
+    display:flex; flex-direction:column; align-items:center; justify-content:center;
+    height:100%; min-height:0;
+    opacity:0;
+    transform: translateY(30px) scale(0.9);
+    animation: popIn 0.7s cubic-bezier(.34,1.56,.64,1) forwards;
+  }
+  .balloon-wrap:nth-child(1){ animation-delay: 0.6s; }
+  .balloon-wrap:nth-child(2){ animation-delay: 0.75s; }
+  .balloon-wrap:nth-child(3){ animation-delay: 0.9s; }
+  .balloon-wrap:nth-child(4){ animation-delay: 1.05s; }
+
+  @keyframes popIn{
+    to{ opacity:1; transform: translateY(0) scale(1); }
+  }
+
+  .balloon-btn{
+    background:none; border:none; cursor:pointer; padding:0;
+    display:flex; flex-direction:column; align-items:center; justify-content:center;
+    height:100%; min-height:0;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .balloon-btn:focus-visible .balloon-svg{ outline: 3px solid var(--rose-deep); outline-offset: 6px; border-radius: 20px; }
+
+  .balloon-svg{
+    width: auto; height: 100%; max-height: 260px; display:block;
+    filter: drop-shadow(0 14px 16px rgba(120, 40, 70, 0.16));
+    transition: transform 0.15s ease, height 0.4s ease, max-height 0.4s ease;
+  }
+  .balloon-btn:hover .balloon-svg{ transform: scale(1.035); }
+  .balloon-btn:active .balloon-svg{ transform: scale(0.97); }
+
+  .floaty{
+    display:flex; align-items:center; justify-content:center;
+    height:100%; transform-origin: 50% 62%;
+    animation: floatSway 4.4s ease-in-out infinite;
+  }
+  .balloon-wrap:nth-child(2) .floaty{ animation-duration: 5.1s; animation-delay: -1.4s; }
+  .balloon-wrap:nth-child(3) .floaty{ animation-duration: 3.9s; animation-delay: -2.6s; }
+  .balloon-wrap:nth-child(4) .floaty{ animation-duration: 5.6s; animation-delay: -0.7s; }
+
+  @keyframes floatSway{
+    0%   { transform: translateY(0)     rotate(-2.6deg); }
+    25%  { transform: translateY(-10px) rotate(0deg); }
+    50%  { transform: translateY(-17px) rotate(2.6deg); }
+    75%  { transform: translateY(-8px)  rotate(0.4deg); }
+    100% { transform: translateY(0)     rotate(-2.6deg); }
+  }
+
+  .balloon-wrap.popped .balloon-btn{ pointer-events:none; }
+  .balloon-wrap.popped .floaty{ animation: none; }
+  .balloon-wrap.popped .balloon-svg{ animation: popScale 0.3s ease forwards; }
+  
+  @keyframes popScale{
+    0%{ transform: scale(1); opacity:1; }
+    55%{ transform: scale(1.22); opacity:0.65; }
+    100%{ transform: scale(1.55); opacity:0; }
+  }
+
+  /* ---------- Message Overlay & Dynamic Flying Cards ---------- */
+  .message-overlay{
+    position:fixed; inset:0;
+    background: rgba(74, 50, 69, 0.45);
+    backdrop-filter: blur(4px);
+    z-index: 200;
+    opacity:0;
+    visibility:hidden;
+    transition: opacity 0.4s ease, visibility 0.4s ease;
+  }
+  .message-overlay.show{ opacity:1; visibility:visible; }
+
+  /* Base styling for the card */
+  .flying-card {
+    position: fixed;
+    /* Compact base size that scales with the viewport instead of a fixed px */
+    width: clamp(200px, 22vw, 260px); 
+    padding: 16px 16px 20px;
+    background: var(--card);
+    border-radius: 16px;
+    text-align: center;
+    box-shadow: 0 30px 60px rgba(140, 40, 80, 0.28);
+    opacity: 0;
+    pointer-events: none;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    transition: transform 0.8s cubic-bezier(.34,1.56,.64,1), opacity 0.4s ease, width 0.4s ease;
+    max-height: 78vh;
+    overflow-y: auto;
+  }
+
+  /* Arrow button */
+  .flying-card .arrow-btn {
+    position: absolute; top: 10px; right: 10px;
+    width: 32px; height: 32px;
+    border-radius: 50%; border: none;
+    background: var(--bg-1);
+    color: var(--rose-deep);
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    z-index: 10;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    transition: transform 0.2s, background 0.2s;
+  }
+  .flying-card .arrow-btn:hover { background: var(--bg-2); transform: scale(1.1); }
+  .flying-card .arrow-btn:focus-visible { outline: 2px solid var(--rose); }
+
+  /* PORTRAIT IMAGE CONTAINER */
+  .message-image-container {
+    width: 100%;
+    aspect-ratio: 3 / 4; 
+    height: auto;
+    border-radius: 10px;
+    overflow: hidden;
+    margin-bottom: 12px;
+    background: var(--bg-2);
+    box-shadow: inset 0 0 10px rgba(0,0,0,0.05);
+  }
+  .message-image-container img {
+    width: 100%; height: 100%;
+    object-fit: cover; display: block;
+  }
+
+  .message-mark{ font-family:'Caveat', cursive; font-size: 1.6rem; color: var(--rose); display:block; margin-bottom: 2px; }
+  .message-text{ font-family:'Playfair Display', serif; font-style: italic; font-size: 1.15rem; line-height: 1.45; color: var(--ink); margin: 0 0 12px; }
+  .message-sign{ font-family:'Caveat', cursive; font-size: 1.4rem; color: var(--plum); margin:0; }
+
+  /* ----- Staggered State Transforms for Cards ----- */
+  
+  /* Starting anchors: Top ones go to the outer edges, Bottom ones are pulled inward towards the center! */
+  .pos-0 { top: 20px; left: 20px; transform-origin: center center; }
+  .pos-1 { top: 20px; right: 20px; transform-origin: center center; }
+  .pos-2 { bottom: 30px; left: 180px; transform-origin: center center; }
+  .pos-3 { bottom: 30px; right: 180px; transform-origin: center center; }
+
+  /* Centered (Popup) State: Scales up heavily for easy reading */
+  .flying-card.centered {
+    opacity: 1; pointer-events: auto; z-index: 201; 
+  }
+  /* Precise translation to pull them from their offset anchors exactly to the center of the screen */
+  .pos-0.centered { transform: translate(calc(50vw - 50% - 20px), calc(50vh - 50% - 20px)) scale(1.15); }
+  .pos-1.centered { transform: translate(calc(-50vw + 50% + 20px), calc(50vh - 50% - 20px)) scale(1.15); }
+  .pos-2.centered { transform: translate(calc(50vw - 50% - 180px), calc(-50vh + 50% + 30px)) scale(1.15); }
+  .pos-3.centered { transform: translate(calc(-50vw + 50% + 180px), calc(-50vh + 50% + 30px)) scale(1.15); }
+
+  /* Pinned (Slide aside) State - Very subtle shrink, beautiful outward tilt */
+  .flying-card.pinned {
+    opacity: 1; pointer-events: auto;
+    cursor: pointer;
+    z-index: 50; 
+    box-shadow: 0 15px 30px rgba(140, 40, 80, 0.2);
+  }
+  .flying-card.pinned:hover {
+    box-shadow: 0 20px 40px rgba(140, 40, 80, 0.32);
+  }
+  
+  /* Scale 0.85 looks huge and natural, while rotations fan them outwards perfectly */
+  .pos-0.pinned { transform: scale(0.85) rotate(-6deg); }
+  .pos-1.pinned { transform: scale(0.85) rotate(5deg); }
+  .pos-2.pinned { transform: scale(0.85) rotate(3deg); }
+  .pos-3.pinned { transform: scale(0.85) rotate(-4deg); }
+
+  /* ---------- Finale & Continue Button ---------- */
+  .progress-row{
+    display:flex; justify-content:center; gap:10px;
+    margin-top: clamp(8px, 2vh, 24px);
+  }
+  .dot{
+    width:10px; height:10px; border-radius:50%;
+    background: #f0d3de;
+    transition: background 0.3s ease, transform 0.3s ease;
+  }
+  .dot.done{ background: var(--rose); transform: scale(1.15); }
+
+  .finale{
+    position: relative; z-index: 100;
+    margin-top: 0; text-align:center; opacity:0; max-height:0; overflow:hidden;
+    transition: opacity 0.6s ease, max-height 0.6s ease, margin 0.6s ease;
+  }
+  .finale.show{ opacity:1; max-height:220px; margin-top: clamp(8px, 2vh, 24px); }
+  .finale p{ font-family:'Caveat', cursive; font-size: clamp(1.3rem, 2.8vh, 1.9rem); color: var(--rose-deep); margin:0; }
+
+  .continue-btn {
+    display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+    margin-top: clamp(10px, 2vh, 20px); padding: clamp(10px, 2vh, 14px) 32px;
+    background: var(--rose); color: white;
+    text-decoration: none; font-weight: 600; font-size: 1.1rem;
+    border: none; /* FIX: Removes the default grey browser border */
+    border-radius: 30px;
+    box-shadow: 0 8px 20px rgba(232, 67, 122, 0.3);
+    transition: transform 0.3s, box-shadow 0.3s, background 0.3s;
+    pointer-events: auto; 
+    position: relative;
+    z-index: 100;
+    cursor: pointer; /* Ensures it shows a clicking hand when hovering */
+  }
+  .continue-btn:hover {
+    transform: translateY(-3px); background: var(--rose-deep);
+    box-shadow: 0 12px 24px rgba(232, 67, 122, 0.4);
+  }
+
+  /* Responsive Adjustments for Mobile & Tablets */
+  @media (max-width: 900px){
+    /* Slightly closer to edges on smaller laptops/tablets */
+    .pos-2 { left: 80px; }
+    .pos-3 { right: 80px; }
+    .pos-0.centered { transform: translate(calc(50vw - 50% - 20px), calc(50vh - 50% - 20px)) scale(1.05); }
+    .pos-1.centered { transform: translate(calc(-50vw + 50% + 20px), calc(50vh - 50% - 20px)) scale(1.05); }
+    .pos-2.centered { transform: translate(calc(50vw - 50% - 80px), calc(-50vh + 50% + 30px)) scale(1.05); }
+    .pos-3.centered { transform: translate(calc(-50vw + 50% + 80px), calc(-50vh + 50% + 30px)) scale(1.05); }
+    .pos-0.pinned, .pos-1.pinned, .pos-2.pinned, .pos-3.pinned { transform: scale(0.7) rotate(0deg); }
+    .pos-0.pinned { transform: scale(0.7) rotate(-5deg); }
+    .pos-1.pinned { transform: scale(0.7) rotate(5deg); }
+    .pos-2.pinned { transform: scale(0.7) rotate(3deg); }
+    .pos-3.pinned { transform: scale(0.7) rotate(-3deg); }
+  }
+
+  @media (max-width: 600px){
+    .field{ column-gap: clamp(14px, 5vw, 24px); row-gap: clamp(10px, 3vh, 40px); }
+    .balloon-svg{ max-height: 190px; }
+    
+    /* On mobile, revert to pure corners to maximize space, scaled down heavily */
+    .pos-0 { top: 15px; left: 10px; }
+    .pos-1 { top: 15px; right: 10px; }
+    .pos-2 { bottom: 40px; left: 10px; }
+    .pos-3 { bottom: 40px; right: 10px; }
+
+    .pos-0.centered { transform: translate(calc(50vw - 50% - 10px), calc(50vh - 50% - 15px)) scale(1); }
+    .pos-1.centered { transform: translate(calc(-50vw + 50% + 10px), calc(50vh - 50% - 15px)) scale(1); }
+    .pos-2.centered { transform: translate(calc(50vw - 50% - 10px), calc(-50vh + 50% + 40px)) scale(1); }
+    .pos-3.centered { transform: translate(calc(-50vw + 50% + 10px), calc(-50vh + 50% + 40px)) scale(1); }
+
+    .pos-0.pinned { transform: scale(0.5) rotate(-4deg); }
+    .pos-1.pinned { transform: scale(0.5) rotate(4deg); }
+    .pos-2.pinned { transform: scale(0.5) rotate(3deg); }
+    .pos-3.pinned { transform: scale(0.5) rotate(-3deg); }
+
+    .center-gif-container {
+        width: 140px; height: 140px;
+        transform: translate(-50%, -20%) scale(0.7);
+    }
+    .center-gif-container.show { transform: translate(-50%, -20%) scale(1); }
+  }
+
+  @media (prefers-reduced-motion: reduce){
+    .floaty, .loader-balloon, .magic-star{ animation: none !important; }
+    .stage, .flying-card, .center-gif-container { transition: none !important; }
+  }
+</style>
+</head>
+<body>
+
+<audio id="bgm" src="../assets/audio/page3_bgm.mpeg" preload="auto" loop></audio>
+
+<!-- <div id="loader">
+  <div class="loader-balloon"></div>
+</div> -->
+
+<div class="topbar">
+  <button class="arrow-btn-top" id="backBtn" aria-label="Go back">&#8592;</button>
+  <button class="icon-btn hidden-btn" id="muteBtn" aria-label="Toggle sound">&#128264;</button>
+</div>
+
+<div class="stage" id="stage">
+  <div class="heading-block">
+    <p class="eyebrow"> Warning: Highly Cheesy Stuffs Inside. Pop at Your Own Risk!</p>
+    <h1>Pop the Balloons</h1>
+    <p class="subline"> for your daily dose of knowing exactly how much you mean to me &hellip;</p>
+  </div>
+
+  <!-- Center GIF Placeholder (Hidden initially) -->
+  <div class="center-gif-container" id="centerGif" style="display: flex; justify-content: center; align-items: center; width: 100%; max-width: 220px; margin: 0 auto;">
+    <video autoplay muted loop playsinline style="width: 100%; height: auto; object-fit: contain; mix-blend-mode: multiply; border-radius: 20px; display: block;">
+        <source src="../assets/videos/page3_gif.mp4" type="video/mp4">
+    </video>
+  </div>
+
+  <div class="field" id="field">
+
+    <!-- Blue balloon -->
+    <div class="balloon-wrap" data-msg="0">
+      <button class="balloon-btn" aria-label="Pop the blue balloon">
+        <div class="floaty">
+          <svg class="balloon-svg" viewBox="0 0 140 260" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <radialGradient id="gradBlue" cx="35%" cy="28%" r="75%">
+                <stop offset="0%" stop-color="#eaf7ff"/>
+                <stop offset="55%" stop-color="#8fcbef"/>
+                <stop offset="100%" stop-color="#4f9bc9"/>
+              </radialGradient>
+            </defs>
+            <path class="string" d="M70 172 C54 189 87 203 68 222 C55 236 83 247 66 258" fill="none" stroke="#7fb8dd" stroke-width="2.4" stroke-linecap="round"/>
+            <path class="knot" d="M61 157 L79 157 L70 172 Z" fill="#4f9bc9"/>
+            <path class="body" d="M70 6 C33 6 8 46 8 87 C8 133 34 160 70 160 C106 160 132 133 132 87 C132 46 107 6 70 6 Z" fill="url(#gradBlue)"/>
+            <ellipse cx="46" cy="46" rx="17" ry="25" fill="#ffffff" opacity="0.45" transform="rotate(-18 46 46)"/>
+            <ellipse cx="38" cy="34" rx="6" ry="9" fill="#ffffff" opacity="0.7" transform="rotate(-18 38 34)"/>
+          </svg>
+        </div>
+      </button>
+    </div>
+
+    <!-- Pink balloon -->
+    <div class="balloon-wrap" data-msg="1">
+      <button class="balloon-btn" aria-label="Pop the pink balloon">
+        <div class="floaty">
+          <svg class="balloon-svg" viewBox="0 0 140 260" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <radialGradient id="gradPink" cx="35%" cy="28%" r="75%">
+                <stop offset="0%" stop-color="#fff0f4"/>
+                <stop offset="55%" stop-color="#f3a3bb"/>
+                <stop offset="100%" stop-color="#df6a90"/>
+              </radialGradient>
+            </defs>
+            <path class="string" d="M70 172 C54 189 87 203 68 222 C55 236 83 247 66 258" fill="none" stroke="#e79bb2" stroke-width="2.4" stroke-linecap="round"/>
+            <path class="knot" d="M61 157 L79 157 L70 172 Z" fill="#df6a90"/>
+            <path class="body" d="M70 6 C33 6 8 46 8 87 C8 133 34 160 70 160 C106 160 132 133 132 87 C132 46 107 6 70 6 Z" fill="url(#gradPink)"/>
+            <ellipse cx="46" cy="46" rx="17" ry="25" fill="#ffffff" opacity="0.45" transform="rotate(-18 46 46)"/>
+            <ellipse cx="38" cy="34" rx="6" ry="9" fill="#ffffff" opacity="0.7" transform="rotate(-18 38 34)"/>
+          </svg>
+        </div>
+      </button>
+    </div>
+
+    <!-- Green balloon -->
+    <div class="balloon-wrap" data-msg="2">
+      <button class="balloon-btn" aria-label="Pop the green balloon">
+        <div class="floaty">
+          <svg class="balloon-svg" viewBox="0 0 140 260" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <radialGradient id="gradGreen" cx="35%" cy="28%" r="75%">
+                <stop offset="0%" stop-color="#f1fbf1"/>
+                <stop offset="55%" stop-color="#a9dcb0"/>
+                <stop offset="100%" stop-color="#69b477"/>
+              </radialGradient>
+            </defs>
+            <path class="string" d="M70 172 C54 189 87 203 68 222 C55 236 83 247 66 258" fill="none" stroke="#9fd0a7" stroke-width="2.4" stroke-linecap="round"/>
+            <path class="knot" d="M61 157 L79 157 L70 172 Z" fill="#69b477"/>
+            <path class="body" d="M70 6 C33 6 8 46 8 87 C8 133 34 160 70 160 C106 160 132 133 132 87 C132 46 107 6 70 6 Z" fill="url(#gradGreen)"/>
+            <ellipse cx="46" cy="46" rx="17" ry="25" fill="#ffffff" opacity="0.45" transform="rotate(-18 46 46)"/>
+            <ellipse cx="38" cy="34" rx="6" ry="9" fill="#ffffff" opacity="0.7" transform="rotate(-18 38 34)"/>
+          </svg>
+        </div>
+      </button>
+    </div>
+
+    <!-- Purple balloon -->
+    <div class="balloon-wrap" data-msg="3">
+      <button class="balloon-btn" aria-label="Pop the purple balloon">
+        <div class="floaty">
+          <svg class="balloon-svg" viewBox="0 0 140 260" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <radialGradient id="gradPurple" cx="35%" cy="28%" r="75%">
+                <stop offset="0%" stop-color="#f6f2ff"/>
+                <stop offset="55%" stop-color="#c3aeee"/>
+                <stop offset="100%" stop-color="#9877d6"/>
+              </radialGradient>
+            </defs>
+            <path class="string" d="M70 172 C54 189 87 203 68 222 C55 236 83 247 66 258" fill="none" stroke="#b7a4e0" stroke-width="2.4" stroke-linecap="round"/>
+            <path class="knot" d="M61 157 L79 157 L70 172 Z" fill="#9877d6"/>
+            <path class="body" d="M70 6 C33 6 8 46 8 87 C8 133 34 160 70 160 C106 160 132 133 132 87 C132 46 107 6 70 6 Z" fill="url(#gradPurple)"/>
+            <ellipse cx="46" cy="46" rx="17" ry="25" fill="#ffffff" opacity="0.45" transform="rotate(-18 46 46)"/>
+            <ellipse cx="38" cy="34" rx="6" ry="9" fill="#ffffff" opacity="0.7" transform="rotate(-18 38 34)"/>
+          </svg>
+        </div>
+      </button>
+    </div>
+
+  </div>
+
+  <div class="progress-row" id="progressRow">
+    <span class="dot" data-dot="0"></span>
+    <span class="dot" data-dot="1"></span>
+    <span class="dot" data-dot="2"></span>
+    <span class="dot" data-dot="3"></span>
+  </div>
+
+  <div class="finale" id="finale">
+    <p>So, You survived the cheese! Ready for the main course??</p>
+    <button class="continue-btn" id="goToPage4Btn">Continue to the next chapter &rarr;</button>
+  </div>
+
+</div>
+
+<!-- Backdrop Overlay (Cards are generated dynamically) -->
+<div class="message-overlay" id="overlay"></div>
+<div id="cardsContainer"></div>
+
+<script>
+
+  const bgm = document.getElementById('bgm');
+
+  window.addEventListener('load', () => {
+    bgm.volume = 0.5;
+    bgm.play().catch(() => {
+      // Backup if browser blocks autoplay
+      window.addEventListener('click', () => bgm.play(), { once: true });
+    });
+
+    // Continuously save music time so Page 4 can pick it up instantly
+    setInterval(() => {
+      if (!bgm.paused) {
+        localStorage.setItem('bgmCurrentTime', bgm.currentTime);
+        localStorage.setItem('bgmPlaying', 'true');
+      }
+    }, 300);
+  });
+
+  // When leaving Page 3 for Page 4, save state and let it carry over
+  document.getElementById('goToPage4Btn').addEventListener('click', () => {
+    localStorage.setItem('bgmCurrentTime', bgm.currentTime);
+    localStorage.setItem('bgmPlaying', 'true');
+    // Page transition code...
+  });
+  // ---------- Magic Sparkle Transition Function ----------
+  function playSparkleTransition() {
+    const container = document.createElement('div');
+    container.style.position = 'fixed';
+    container.style.inset = '0';
+    container.style.pointerEvents = 'none';
+    container.style.zIndex = '9999';
+    container.style.overflow = 'hidden';
+    document.body.appendChild(container);
+
+    const colors = ['#f4d03f', '#e8437a', '#8fcbef', '#ffffff', '#a281de'];
+    
+    // Generate ~40 stars bursting across the screen
+    for (let i = 0; i < 40; i++) {
+      const star = document.createElement('div');
+      star.className = 'magic-star';
+      star.style.left = Math.random() * 100 + 'vw';
+      star.style.top = Math.random() * 100 + 'vh';
+      star.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+      
+      const size = Math.random() * 18 + 12; // Between 12px and 30px
+      star.style.width = size + 'px';
+      star.style.height = size + 'px';
+      
+      star.style.animationDelay = (Math.random() * 0.4) + 's';
+      container.appendChild(star);
+    }
+
+    // Clean up container after animations complete
+    setTimeout(() => {
+      container.remove();
+    }, 2500); 
+  }
+
+  // ---------- Page Transition & Loading ----------
+  function playIntro() {
+    // Smooth fade-in of the entire body and reveal stage instantly
+    setTimeout(() => {
+        document.body.classList.add('loaded');
+        document.getElementById('stage').classList.add('reveal');
+        playSparkleTransition();
+    }, 50);
+  }
+
+  window.addEventListener('DOMContentLoaded', playIntro);
+
+  // ---------- Messages, Images (Portrait) & Dynamic Cards ----------
+  const cardData = [
+    {
+      img: "../assets/images/for_page3/photo1.jpeg",
+      msg: "I'm so grateful to have you in my life. You are the best thing that has ever happened to me. Thank you for being you. Thank you for being mine."
+    },
+    {
+      img: "../assets/images/for_page3/photo2.jpeg",
+      msg: "You are my favourite notification, my favourite distraction, and my favourite reason to check my phone every two minutes."
+
+    },
+    {
+      img: "../assets/images/for_page3/photo3.jpeg",
+      msg: "I should probably be more careful, but how could I fight it ? You are a temptation I don't want to escape."
+    },
+    {
+      img: "../assets/images/for_page3/photo4.jpeg",
+      msg: "Even when I stay quiet, my mind is always full of you. Even when I don't show it perfectly, my heart still chooses you every single time."
+    }
+  ];
+
+  const cardsContainer = document.getElementById('cardsContainer');
+  const overlay = document.getElementById('overlay');
+  
+  // Inject the 4 cards into the DOM
+  function buildCards() {
+    cardsContainer.innerHTML = '';
+    cardData.forEach((data, idx) => {
+      const card = document.createElement('div');
+      card.className = `flying-card pos-${idx}`;
+      card.id = `card-${idx}`;
+      
+      card.innerHTML = `
+        <button class="arrow-btn" aria-label="Move aside" onclick="pinCard(${idx})">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+             <path d="M5 12h14M12 5l7 7-7 7"/>
+          </svg>
+        </button>
+        <div class="message-image-container">
+          <img src="${data.img}" alt="Memory for Sreeja" />
+        </div>
+        <span class="message-mark">&#10024;</span>
+        <p class="message-text">${data.msg}</p>
+        
+      `;
+      cardsContainer.appendChild(card);
+    });
+  }
+  buildCards();
+
+  const dots = document.querySelectorAll('.dot');
+  const finale = document.getElementById('finale');
+  const centerGif = document.getElementById('centerGif');
+  let poppedCount = 0;
+  let activeCardIndex = null;
+  const poppedSet = new Set();
+  const colorMap = { 0:'#5aa9d6', 1:'#e8688f', 2:'#74bd82', 3:'#a281de' };
+
+  // Helper for balloon burst
+  function createBurst(originEl, colorHex){
+    const rect = originEl.getBoundingClientRect();
+    const cx = rect.left + rect.width/2;
+    const cy = rect.top + rect.height * 0.42;
+    const container = document.createElement('div');
+    container.style.position = 'fixed';
+    container.style.left = 0; container.style.top = 0;
+    container.style.width = '100%'; container.style.height = '100%';
+    container.style.pointerEvents = 'none'; container.style.zIndex = 150;
+    document.body.appendChild(container);
+
+    const particleCount = 16;
+    for(let i=0; i<particleCount; i++){
+      const p = document.createElement('div');
+      const angle = (Math.PI * 2 * i) / particleCount;
+      const dist = 45 + Math.random()*35;
+      p.style.position = 'absolute'; p.style.left = cx + 'px'; p.style.top = cy + 'px';
+      p.style.width = '7px'; p.style.height = '7px';
+      p.style.borderRadius = '50%'; p.style.background = colorHex;
+      p.style.transform = 'translate(-50%,-50%)';
+      p.style.transition = 'transform 0.55s cubic-bezier(.2,.8,.4,1), opacity 0.55s ease';
+      container.appendChild(p);
+      requestAnimationFrame(() => {
+        p.style.transform = `translate(calc(-50% + ${Math.cos(angle)*dist}px), calc(-50% + ${Math.sin(angle)*dist}px))`;
+        p.style.opacity = '0';
+      });
+    }
+    setTimeout(() => container.remove(), 650);
+  }
+
+  // Balloon click listener
+  document.querySelectorAll('.balloon-wrap').forEach(wrap => {
+    const btn = wrap.querySelector('.balloon-btn');
+    const svgEl = wrap.querySelector('.balloon-svg');
+    const idx = parseInt(wrap.dataset.msg, 10);
+
+    btn.addEventListener('click', () => {
+      if (wrap.classList.contains('popped') || activeCardIndex !== null) return;
+      
+      wrap.classList.add('popped');
+      createBurst(svgEl, colorMap[idx]);
+
+      if (!poppedSet.has(idx)) {
+        poppedSet.add(idx);
+        poppedCount++;
+        dots[idx].classList.add('done');
+      }
+
+      setTimeout(() => {
+        const card = document.getElementById(`card-${idx}`);
+        card.classList.add('centered');
+        overlay.classList.add('show');
+        activeCardIndex = idx;
+      }, 220);
+    });
+  });
+
+  // Pin Card function triggered by the arrow button
+  window.pinCard = function(idx) {
+    const card = document.getElementById(`card-${idx}`);
+    card.classList.remove('centered');
+    card.classList.add('pinned');
+    overlay.classList.remove('show');
+    activeCardIndex = null;
+
+    // Show the "Continue" section and fade in the Center GIF once all balloons are popped and the last card is pinned
+    if (poppedCount === 4) {
+      setTimeout(() => {
+        finale.classList.add('show');
+        centerGif.classList.add('show');
+      }, 500);
+    }
+  };
+
+  // Reopen a pinned (tucked-aside) card when it's clicked again
+  function reopenCard(idx) {
+    if (activeCardIndex !== null) return;
+    const card = document.getElementById(`card-${idx}`);
+    card.classList.remove('pinned');
+    card.classList.add('centered');
+    overlay.classList.add('show');
+    activeCardIndex = idx;
+  }
+
+  cardsContainer.addEventListener('click', (e) => {
+    if (e.target.closest('.arrow-btn')) return; // the arrow button already handles pinning it away
+    const card = e.target.closest('.flying-card');
+    if (!card || !card.classList.contains('pinned')) return;
+    const idx = parseInt(card.id.split('-')[1], 10);
+    reopenCard(idx);
+  });
+
+  // Allow clicking the overlay background to also slide the card away
+  overlay.addEventListener('click', () => {
+    if (activeCardIndex !== null) pinCard(activeCardIndex);
+  });
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && activeCardIndex !== null) pinCard(activeCardIndex);
+  });
+
+  // ---------- Start Fresh When Returning to This Page (bfcache restore) ----------
+  window.addEventListener('pageshow', (event) => {
+    if (!event.persisted) return; // first load is already handled by DOMContentLoaded above
+
+    // Reset balloons
+    document.querySelectorAll('.balloon-wrap').forEach(w => w.classList.remove('popped'));
+    poppedCount = 0;
+    poppedSet.clear();
+    dots.forEach(d => d.classList.remove('done'));
+    activeCardIndex = null;
+
+    // Rebuild the cards from scratch so none are left centered/pinned
+    buildCards();
+
+    overlay.classList.remove('show');
+    finale.classList.remove('show');
+    centerGif.classList.remove('show');
+
+    // Reset the stage/body and replay the entrance sequence
+    const stageEl = document.getElementById('stage');
+    stageEl.classList.remove('reveal');
+    document.body.classList.remove('loaded');
+
+    void document.body.offsetWidth; // force reflow so transitions restart cleanly
+
+    playIntro();
+  });
+
+  // ---------- Mute button (visual only) ----------
+  const muteBtn = document.getElementById('muteBtn');
+  let muted = true;
+  muteBtn.addEventListener('click', () => {
+    muted = !muted;
+    muteBtn.innerHTML = muted ? '&#128264;' : '&#128266;';
+  });
+
+  document.getElementById('goToPage4Btn').addEventListener('click', (e) => {
+    console.log("Continue button clicked!"); // Check your F12 Console to see if this prints
+    
+    // Smooth fade-out effect
+    document.body.classList.remove('loaded');
+    
+    // Relative path: goes up out of 'page3' and into 'page4'
+    setTimeout(() => {
+      window.location.href = '../page4/page4.html';
+    }, 1500);
+  });
+
+  // ---------- Back Button Functionality with Exit Fade ----------
+  document.getElementById('backBtn').addEventListener('click', () => {
+    // Smooth fade-out effect
+    document.body.classList.remove('loaded');
+    
+    // Explicitly route back to Page 2 after the fade finishes
+    setTimeout(() => {
+      window.location.href = '../page2/page2.html';
+    }, 1200);
+  });
+
+</script>
+
+</body>
+</html>

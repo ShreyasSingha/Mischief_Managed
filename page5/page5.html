@@ -1,0 +1,503 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>For Sreeja</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Alpine.js CDN for reactivity -->
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@600;700&family=Poppins:wght@300;400;500&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(135deg, #fff0f5 0%, #ffe4e1 100%);
+            overflow-x: hidden;
+            margin: 0;
+            min-height: 100vh;
+            /* Smooth page exit transition */
+            transition: opacity 1.2s ease-in-out; 
+            opacity: 1;
+        }
+        body.fade-out {
+            opacity: 0;
+            animation: none;
+        }
+
+        /* NEW: Smooth page load fade-in */
+        .page-fade-in { animation: pageFade 1.2s ease-in-out forwards; }
+        @keyframes pageFade { from { opacity: 0; } to { opacity: 1; } }
+
+        .script-font {
+            font-family: 'Dancing Script', cursive;
+        }
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-6px); }
+        }
+        .animate-float {
+            animation: float 3s ease-in-out infinite;
+        }
+
+        /* ---------- Backdrop Overlay ---------- */
+        .message-overlay {
+            position: fixed; inset: 0;
+            background: rgba(74, 50, 69, 0.35);
+            backdrop-filter: blur(4px);
+            z-index: 200;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.8s ease, visibility 0.8s ease;
+        }
+        .message-overlay.show { opacity: 1; visibility: visible; }
+
+        /* ---------- Card Styling ---------- */
+        .card-item {
+            background: #ffffff;
+            border-radius: 18px;
+            text-align: center;
+            box-shadow: 0 12px 30px rgba(140, 40, 80, 0.12);
+            width: 140px; /* Swapped from 200px */
+            padding: 10px; /* Reduced slightly for the narrower width */
+            position: relative;
+            transition: transform 0.6s cubic-bezier(0.25, 1, 0.5, 1), box-shadow 0.6s ease;
+        }
+        .card-item:hover {
+            transform: translateY(-4px) scale(1.02);
+            box-shadow: 0 16px 35px rgba(140, 40, 80, 0.18);
+        }
+
+        /* ---------- Center Pop-up Modal State ---------- */
+        .card-modal-wrapper {
+            position: fixed; inset: 0;
+            display: flex; align-items: center; justify-content: center;
+            z-index: 201;
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.8s ease;
+        }
+        .card-modal-wrapper.show {
+            opacity: 1;
+            pointer-events: auto;
+        }
+        
+        /* Modal Content (Card) */
+        .card-modal-wrapper .card-item {
+            width: 300px;
+            padding: 24px;
+            transform: scale(0.8) translateY(20px);
+            transition: transform 1.5s cubic-bezier(0.25, 1, 0.5, 1);
+            box-shadow: 0 30px 60px rgba(140, 40, 80, 0.3);
+        }
+        .card-modal-wrapper.show .card-item {
+            transform: scale(1) translateY(0);
+        }
+
+        /* Modal Content (Photo - Faded Boundary Style) */
+        .card-modal-wrapper .photo-modal-item {
+            width: 440px;
+            aspect-ratio: 4 / 3;
+            background: rgba(253, 242, 248, 0.5); /* Semi-transparent pink-50 */
+            border: 4px solid rgba(249, 168, 212, 0.3); /* Faded pink border */
+            border-radius: 20px;
+            padding: 8px; 
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            transform: scale(0.8) translateY(20px);
+            transition: transform 1.5s cubic-bezier(0.25, 1, 0.5, 1);
+            box-shadow: 0 0 30px rgba(249, 168, 212, 0.3), 0 30px 60px rgba(140, 40, 80, 0.2);
+        }
+
+        .card-modal-wrapper.show .photo-modal-item {
+            transform: scale(1) translateY(0);
+        }
+
+        /* ---------- Image Placeholder Styling ---------- */
+        .photo-placeholder {
+            opacity: 0;
+            pointer-events: none;
+            transform: scale(0.9);
+            transition: opacity 1.5s cubic-bezier(0.25, 1, 0.5, 1), transform 1.5s cubic-bezier(0.25, 1, 0.5, 1);
+            aspect-ratio: 4 / 3;
+            width: 200px; /* Swapped from 140px */
+            cursor: pointer;
+        }
+        .photo-placeholder.show {
+            opacity: 1;
+            pointer-events: auto;
+            transform: scale(1);
+        }
+        .photo-placeholder:hover {
+            background-color: rgba(251, 207, 232, 0.9);
+            transform: translateY(-2px) scale(1.02);
+            box-shadow: 0 10px 20px rgba(140, 40, 80, 0.12);
+        }
+    </style>
+</head>
+<body id="mainBody" class="flex flex-col justify-between items-center text-gray-700 select-none p-6 page-fade-in" x-data="appState()" @reset-state.window="reset()">
+
+    <!-- Audio Element for Chime Sound -->
+    <audio id="chimeSound" src="../assets\audio\chime.mpeg" preload="auto"></audio>
+
+    <!-- Top Navigation -->
+    <div class="w-full max-w-7xl flex justify-between items-center text-pink-400 text-2xl cursor-pointer z-50">
+        <span onclick="history.back()" class="transition-transform hover:scale-125">&larr;</span>
+        <span></span>
+        <span onclick="window.location.href='../page6/page6.html'" class="transition-transform hover:scale-125">&rarr;</span>
+    </div>
+
+    <!-- MAIN CONTAINER WITH SYMMETRICAL GRID COLUMNS -->
+    <main class="w-full max-w-7xl grid grid-cols-1 md:grid-cols-12 gap-4 items-center my-auto px-4 relative z-10">
+
+        <!-- ================= LEFT SIDE GRID COLUMN (Slots 0, 2, 4) ================= -->
+        <div class="hidden md:flex md:col-span-3 flex-col gap-6 justify-center relative z-20">
+            <template x-for="idx in [0, 2, 4]" :key="idx">
+                <div class="flex items-center gap-4">
+                    <!-- Clickable Image Placeholder on the Left (Faded Boundary) -->
+                    <div :id="'photo-' + idx" 
+                         @click="openPhotoModal(idx)"
+                         class="photo-placeholder bg-pink-50/40 border-4 border-pink-300/30 rounded-2xl shadow-[0_0_15px_rgba(249,168,212,0.4)] hover:shadow-[0_0_25px_rgba(249,168,212,0.6)] shrink-0 transition-all duration-300 overflow-hidden p-1.5">
+                        
+                         
+                         <img :src="photoPaths[idx]" class="w-full h-full object-cover rounded-xl transition-opacity duration-[2000ms] ease-in-out opacity-0" :class="gridSlots[idx] !== null ? 'opacity-100' : 'opacity-0'" alt="Memory">                        
+                    </div>
+                    <!-- Card Container on the Right -->
+                    <div class="min-h-[120px] flex items-center">
+                        <div x-show="gridSlots[idx] !== null" 
+                             x-transition:enter="transition transform ease-out duration-[1500ms]"
+                             x-transition:enter-start="opacity-0 translate-y-10 scale-95"
+                             x-transition:enter-end="opacity-100 translate-y-0 scale-100"
+                             class="card-item">
+                            <template x-if="gridSlots[idx]">
+                                <div>
+                                    <button class="absolute top-2 right-2 w-6 h-6 rounded-full bg-pink-50 text-pink-600 border-none cursor-pointer flex items-center justify-center shadow text-xs hover:bg-pink-100 transition-colors" @click="openCardModal(gridSlots[idx])">&#128269;</button>
+                                    <div class="text-xl mb-1" x-text="gridSlots[idx].icon"></div>
+                                    <h4 class="script-font text-lg text-pink-600 font-bold mb-1" x-text="gridSlots[idx].title"></h4>
+                                    <p class="text-[11px] text-gray-600 italic leading-snug" x-text="gridSlots[idx].text"></p>
+                                    <!-- <p class="script-font text-xs text-pink-400 mt-1">&mdash; for Sreeja</p> -->
+                                </div>
+                            </template>
+                        </div>
+                    </div>
+                </div>
+            </template>
+        </div>
+
+        <!-- ================= CENTER MAIN INTERACTIVE CONTENT ================= -->
+        <div class="md:col-span-6 flex flex-col items-center justify-center text-center relative min-h-[550px]">
+            
+            <!-- INTERACTIVE ELEMENTS & HEADINGS (Entire block fades out when video plays) -->
+            <div x-show="!showVideo"
+                 x-transition:leave="transition ease-in-out duration-700"
+                 x-transition:leave-start="opacity-100 scale-100"
+                 x-transition:leave-end="opacity-0 scale-95"
+                 class="w-full flex flex-col items-center justify-center absolute inset-0 z-10 pointer-events-auto"
+                 :class="showVideo ? 'pointer-events-none' : ''">
+                 
+                <!-- Heading Block (Now inside the fading container) -->
+                <div class="w-full max-w-lg mb-6 flex flex-col items-center">
+                    <h1 class="script-font text-4xl sm:text-5xl text-pink-600 font-bold leading-tight flex items-center justify-center gap-2 drop-shadow-sm mb-2">
+                        A small collection of everything I love about you
+                        <!-- <span class="text-2xl animate-bounce">🌷</span> -->
+                    </h1>
+                    <!-- <p class="text-xs sm:text-sm text-pink-400 italic">Tap to unfold just a few of the things that make you so wonderfully you </p> -->
+                </div>
+
+                <!-- 6 Symmetrical Icon Buttons Row -->
+                <div class="flex flex-wrap justify-center gap-3 sm:gap-4 mb-4">
+                    <template x-for="(reason, index) in reasons" :key="index">
+                        <button 
+                            @click="triggerCard(index)"
+                            :class="reason.clicked ? 'bg-gradient-to-tr from-pink-500 to-rose-400 text-white shadow-pink-300/50 scale-110 ring-4 ring-pink-200' : 'bg-white/90 text-pink-400 hover:bg-pink-50 shadow-md hover:scale-110'"
+                            class="w-12 h-12 rounded-full flex items-center justify-center text-xl shadow-lg transition-all duration-500 focus:outline-none relative group">
+                            <span class="relative z-10" x-text="reason.icon"></span>
+                        </button>
+                    </template>
+                </div>
+
+                <!-- Transparent Placeholder Text -->
+                <div class="w-full max-w-md min-h-[40px] flex flex-col justify-center items-center mb-4">
+                    <p class="text-sm text-pink-400 font-medium tracking-wide bg-transparent border-0 shadow-none py-1 px-4 transition-opacity duration-1000" :class="activeCard ? 'opacity-0' : 'opacity-100'">
+                        Tap to unfold just a few of the things that make you so wonderfully you ✨
+                    </p>
+                </div>
+
+                <!-- Centerpiece Bouquet Image -->
+                <div class="mb-4 w-44 sm:w-52 drop-shadow-2xl animate-float">
+                    <img src="../assets\images\tulip_bouquet_glow.png" alt="Tulip Bouquet" class="w-full h-auto rounded-2xl object-cover">
+                </div>
+
+                <!-- Play Reel Button -->
+                <div class="h-14 flex items-center justify-center w-full mt-2">
+                    <button x-show="showContinue"
+                            x-transition:enter="transition ease-out duration-[1500ms]"
+                            x-transition:enter-start="opacity-0 translate-y-6 scale-95"
+                            x-transition:enter-end="opacity-100 translate-y-0 scale-100"
+                            @click="playReel()" 
+                            class="bg-gradient-to-r from-pink-500 to-rose-500 hover:from-pink-600 hover:to-rose-600 text-white font-medium px-8 py-2.5 rounded-full shadow-lg shadow-pink-400/30 transition-all duration-300 transform hover:scale-105 active:scale-95">
+                        I've got a song for you. Wanna give it a listen?
+                    </button>
+                </div>
+            </div>
+
+            <!-- REEL VIDEO CONTAINER -->
+            <div x-show="showVideo" 
+                 style="display: none;"
+                 x-transition:enter="transition ease-out duration-[1200ms] delay-500"
+                 x-transition:enter-start="opacity-0 scale-90"
+                 x-transition:enter-end="opacity-100 scale-100"
+                 class="absolute inset-0 flex flex-col items-center justify-center w-full h-full z-50">
+                 
+                 <!-- Instagram Reel Style Video Player -->
+                 <video id="reelVideo" @ended="videoEnded()" class="w-[280px] sm:w-[340px] max-h-[85%] rounded-[32px] shadow-[0_20px_50px_rgba(140,40,80,0.3)] object-cover aspect-[9/16] border-[6px] border-white/80" playsinline controlsList="nodownload" disablePictureInPicture>
+                    <source src="../assets/videos/page5_song.mp4" type="video/mp4">
+                    Your browser does not support the video tag.
+                </video>
+
+                <!-- NEW: Button to proceed to Page 6 (Appears after video ends) -->
+                <div class="h-14 mt-6 flex items-center justify-center w-full">
+                    <button x-show="showNextButton"
+                            x-transition:enter="transition ease-out duration-1000"
+                            x-transition:enter-start="opacity-0 translate-y-4"
+                            x-transition:enter-end="opacity-100 translate-y-0"
+                            @click="transitionToNextPage()" 
+                            class="bg-gradient-to-r from-pink-500 to-rose-500 hover:from-pink-600 hover:to-rose-600 text-white font-medium px-8 py-3 rounded-full shadow-lg shadow-pink-400/30 transition-all duration-300 transform hover:scale-105 active:scale-95 text-sm sm:text-base">
+                        Wanna see what's lined up next?
+                    </button>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- ================= RIGHT SIDE GRID COLUMN (Slots 1, 3, 5) ================= -->
+        <div class="hidden md:flex md:col-span-3 flex-col gap-6 justify-center relative z-20">
+            <template x-for="idx in [1, 3, 5]" :key="idx">
+                <div class="flex items-center gap-4">
+                    <!-- Card Container on the Left -->
+                    <div class="min-h-[120px] flex items-center">
+                        <div x-show="gridSlots[idx] !== null" 
+                             x-transition:enter="transition transform ease-out duration-[1500ms]"
+                             x-transition:enter-start="opacity-0 translate-y-10 scale-95"
+                             x-transition:enter-end="opacity-100 translate-y-0 scale-100"
+                             class="card-item">
+                            <template x-if="gridSlots[idx]">
+                                <div>
+                                    <button class="absolute top-2 right-2 w-6 h-6 rounded-full bg-pink-50 text-pink-600 border-none cursor-pointer flex items-center justify-center shadow text-xs hover:bg-pink-100 transition-colors" @click="openCardModal(gridSlots[idx])">&#128269;</button>
+                                    <div class="text-xl mb-1" x-text="gridSlots[idx].icon"></div>
+                                    <h4 class="script-font text-lg text-pink-600 font-bold mb-1" x-text="gridSlots[idx].title"></h4>
+                                    <p class="text-[11px] text-gray-600 italic leading-snug" x-text="gridSlots[idx].text"></p>
+                                    <!-- <p class="script-font text-xs text-pink-400 mt-1">&mdash; for Sreeja</p> -->
+                                </div>
+                            </template>
+                        </div>
+                    </div>
+                    <!-- Clickable Image Placeholder on the Right (Faded Boundary) -->
+                    <div :id="'photo-' + idx" 
+                         @click="openPhotoModal(idx)"
+                         class="photo-placeholder bg-pink-50/40 border-4 border-pink-300/30 rounded-2xl shadow-[0_0_15px_rgba(249,168,212,0.4)] hover:shadow-[0_0_25px_rgba(249,168,212,0.6)] shrink-0 transition-all duration-300 overflow-hidden p-1.5">
+                        
+                        <img :src="photoPaths[idx]" class="w-full h-full object-cover rounded-xl transition-opacity duration-[2000ms] ease-in-out opacity-0" :class="gridSlots[idx] !== null ? 'opacity-100' : 'opacity-0'" alt="Memory">                        
+                    </div>
+                </div>
+            </template>
+        </div>
+
+    </main>
+
+    <!-- Backdrop Overlay -->
+    <div class="message-overlay" id="overlay" @click="closeModals()"></div>
+
+    <!-- Center Popup Modal for Active Card Reading -->
+    <div class="card-modal-wrapper" :class="activeCard ? 'show' : ''">
+        <template x-if="activeCard">
+            <div class="card-item relative">
+                <button class="absolute top-3 right-3 w-7 h-7 rounded-full bg-pink-50 text-pink-600 border-none cursor-pointer flex items-center justify-center shadow hover:bg-pink-100 transition-colors text-xs" @click="closeModals()">
+                    &#10005;
+                </button>
+                <div class="text-3xl mb-2" x-text="activeCard.icon"></div>
+                <h4 class="script-font text-2xl text-pink-600 font-bold mb-2" x-text="activeCard.title"></h4>
+                <p class="text-sm text-gray-600 italic leading-relaxed mb-2" x-text="activeCard.text"></p>
+                <!-- <p class="script-font text-base text-pink-400">&mdash; for Sreeja</p> -->
+            </div>
+        </template>
+    </div>
+
+    <!-- Center Popup Modal for Active Photo -->
+    <div class="card-modal-wrapper" :class="activePhoto !== null ? 'show' : ''">
+        <template x-if="activePhoto !== null">
+            <div class="photo-modal-item">
+                <button class="absolute top-4 right-4 w-7 h-7 rounded-full bg-white/80 text-pink-600 border-none cursor-pointer flex items-center justify-center shadow-md hover:bg-pink-100 transition-colors text-xs z-10" @click="closeModals()">
+                    &#10005;
+                </button>
+                
+                <img :src="photoPaths[activePhoto]" class="w-full h-full object-cover rounded-xl" alt="Beautiful Memory">
+                
+            </div>
+        </template>
+    </div>
+
+    <!-- Footer Space -->
+    <footer class="w-full text-center text-xs text-pink-300 py-4 font-light z-10">
+        Made with love for Sreeja 🌷
+    </footer>
+
+    <!-- JS Logic Control via Alpine.js -->
+    <script>
+        function appState() {
+            return {
+                photoPaths: [
+                    '../assets/images/for_page5/photo1.jpeg',
+                    '../assets/images/for_page5/photo2.jpeg',
+                    '../assets/images/for_page5/photo3.jpeg',
+                    '../assets/images/for_page5/photo4.jpeg',
+                    '../assets/images/for_page5/photo5.jpeg',
+                    '../assets/images/for_page5/photo6.jpeg'
+                ],
+                activeCard: null,
+                activePhoto: null,
+                nextSlotIndex: 0,
+                showContinue: false,
+                showVideo: false,
+                showNextButton: false, // NEW STATE
+                gridSlots: [null, null, null, null, null, null],
+                reasons: [
+                    { icon: '💖', title: 'Warmth of your heart', text: 'The purest and the most beautiful soul. Your gentle warmth is my absolute favorite comfort, lighting up my world completely.', clicked: false },
+                    { icon: '🌷', title: 'Tulip Sweetness', text: 'Like a rare, beautiful bloom, your sweetness in my life makes every single day feel vibrantly alive and effortlessly magical.', clicked: false },
+                    { icon: '😊', title: 'Shared Laughter', text: 'From serious fights to cozy cafe dates where we just laugh at our own stubbornness. Finding my way back to your smile is my favourite.', clicked: false },
+                    { icon: '🌟', title: 'My Inspiration', text: 'From my unpredictable mood swings to my wild career pivots, you handle all my chaos gracefully. You never get tired of anchoring me back on track.', clicked: false },
+                    { icon: '⭐', title: 'Pure Magic', text: 'There is an undeniably addictive, pure magic in the way you captivate my senses. Every moment spent with you feels like a dream I never want to wake up from.', clicked: false },
+                    { icon: '🌸', title: 'Your Beautiful Smile', text: 'My absolute weakness ! It is the brightest light in my world, carrying an intoxicating energy that instantly fixes any bad day.', clicked: false }
+                ],
+                
+                reset() {
+                    this.activeCard = null;
+                    this.activePhoto = null;
+                    this.nextSlotIndex = 0;
+                    this.showContinue = false;
+                    this.showVideo = false;
+                    this.showNextButton = false; // Reset the button state
+                    this.gridSlots = [null, null, null, null, null, null];
+                    this.reasons.forEach(r => r.clicked = false);
+                    
+                    document.getElementById('overlay').classList.remove('show');
+                    
+                    const video = document.getElementById('reelVideo');
+                    if (video) {
+                        video.pause();
+                        video.currentTime = 0;
+                    }
+
+                    document.querySelectorAll('.photo-placeholder').forEach(el => el.classList.remove('show'));
+                },
+
+                triggerCard(index) {
+                    let r = this.reasons[index];
+                    if (r.clicked) return;
+
+                    const chime = document.getElementById('chimeSound');
+                    if (chime) {
+                        chime.currentTime = 0; 
+                        chime.play().catch(e => console.log("Audio play prevented:", e));
+                    }
+
+                    r.clicked = true;
+                    this.activeCard = r;
+                    document.getElementById('overlay').classList.add('show');
+
+                    let clickedCount = this.reasons.filter(item => item.clicked).length;
+                    if (clickedCount === 6) {
+                        setTimeout(() => {
+                            if (this.activeCard === r) {
+                                this.closeModals();
+                            }
+                        }, 3000); 
+                    }
+                },
+                openCardModal(cardData) {
+                    this.activeCard = cardData;
+                    document.getElementById('overlay').classList.add('show');
+                },
+                openPhotoModal(idx) {
+                    this.activePhoto = idx;
+                    document.getElementById('overlay').classList.add('show');
+                },
+                closeModals() {
+                    if (this.activeCard) {
+                        let assignedSlot = this.gridSlots.findIndex(s => s === this.activeCard);
+                        
+                        if (assignedSlot === -1 && this.nextSlotIndex < 6) {
+                            assignedSlot = this.nextSlotIndex++;
+                            this.gridSlots[assignedSlot] = this.activeCard;
+                            
+                            setTimeout(() => {
+                                const photo = document.getElementById('photo-' + assignedSlot);
+                                if (photo) photo.classList.add('show');
+                            }, 150);
+
+                            if (this.nextSlotIndex === 6) {
+                                setTimeout(() => {
+                                    this.showContinue = true;
+                                }, 1500);
+                            }
+                        }
+                        this.activeCard = null;
+                    }
+                    
+                    if (this.activePhoto !== null) {
+                        this.activePhoto = null;
+                    }
+
+                    document.getElementById('overlay').classList.remove('show');
+                },
+                playReel() {
+                    this.showVideo = true;
+                    setTimeout(() => {
+                        const video = document.getElementById('reelVideo');
+                        if(video) video.play();
+                    }, 800);
+                },
+                videoEnded() {
+                    const video = document.getElementById('reelVideo');
+                    if (video) {
+                        video.pause();
+                        // Rewind ~0.2s from the end to capture and freeze the last visible frame
+                        if (video.duration && !isNaN(video.duration)) {
+                            video.currentTime = Math.max(0, video.duration - 0.2);
+                        }
+                    }
+                    this.showNextButton = true;
+                },
+                transitionToNextPage() {
+                    document.getElementById('mainBody').classList.add('fade-out');
+                    setTimeout(() => {
+                        window.location.href = '../page6/page6.html'; 
+                    }, 1200);
+                }
+            }
+        }
+    </script>
+    
+    <!-- Fixes Safari/Chrome history caching and eliminates the flicker -->
+    <script>
+        window.addEventListener('pageshow', (event) => {
+            const body = document.getElementById('mainBody');
+            
+            // If we are returning via the browser's Back button, trigger the Alpine reset function!
+            if (event.persisted || sessionStorage.getItem('return_to_page5_end') === 'true') {
+                sessionStorage.removeItem('return_to_page5_end');
+                window.dispatchEvent(new Event('reset-state'));
+            }
+            
+            // Always play the smooth fade-in animation
+            body.classList.remove('fade-out');
+            body.classList.remove('page-fade-in');
+            void body.offsetWidth; 
+            body.classList.add('page-fade-in');
+        });
+    </script>
+</body>
+</html>

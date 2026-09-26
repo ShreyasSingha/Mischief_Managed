@@ -1,0 +1,763 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hello, Cutiepie</title>
+    <link href="https://fonts.googleapis.com/css2?family=Great+Vibes&family=Quicksand:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        html {
+            height: 100%;
+            font-family: 'Quicksand', sans-serif;
+        }
+
+        body {
+            height: 100%;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            background: radial-gradient(ellipse at 50% 20%, #2b2568 0%, #1a1640 32%, #0e0c2c 62%, #06051a 100%);
+            overflow: hidden;
+            opacity: 0;
+            transition: opacity 1.2s ease-in-out;
+        }
+
+        body.loaded {
+            opacity: 1;
+        }
+
+        #stars {
+            position: fixed;
+            inset: 0;
+            z-index: 0;
+            pointer-events: none;
+        }
+
+        .glow {
+            position: fixed;
+            border-radius: 50%;
+            filter: blur(110px);
+            opacity: 0.32;
+            pointer-events: none;
+            z-index: 0;
+        }
+        .glow-1 { width: 620px; height: 620px; background: #6a4fc7; top: -220px; left: -180px; }
+        .glow-2 { width: 560px; height: 560px; background: #e0559c; bottom: -220px; right: -160px; }
+        .glow-3 { width: 420px; height: 420px; background: #3d3aa8; top: 30%; left: 62%; }
+
+        .sparkle {
+            position: fixed;
+            z-index: 1;
+            opacity: 0;
+            pointer-events: none;
+            animation: floatSparkle 9.5s ease-in-out infinite;
+        }
+        @keyframes floatSparkle {
+            0%   { opacity: 0; transform: translateY(20px) scale(0.8); }
+            15%  { opacity: 0.85; }
+            50%  { transform: translateY(-30px) scale(1.05); }
+            85%  { opacity: 0.6; }
+            100% { opacity: 0; transform: translateY(-70px) scale(0.85); }
+        }
+
+        .stage {
+            position: relative;
+            z-index: 2;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .card {
+            position: relative;
+            width: 460px;
+            max-width: 92vw;
+            padding: 60px 46px 52px;
+            border-radius: 32px;
+            background: linear-gradient(180deg, rgba(64, 53, 122, 0.55) 0%, rgba(18, 15, 44, 0.6) 100%);
+            border: 1px solid rgba(255, 255, 255, 0.10);
+            backdrop-filter: blur(10px);
+            text-align: center;
+            box-shadow: 0 40px 100px rgba(0, 0, 0, 0.55), 0 0 0 1px rgba(255, 255, 255, 0.03), inset 0 1px 0 rgba(255, 255, 255, 0.08);
+        }
+        /* Makes the card completely transparent when the video plays */
+        .card.video-mode {
+            background: transparent;
+            border: none;
+            box-shadow: none;
+            backdrop-filter: none;
+            padding: 0; 
+            min-height: auto;
+        }
+
+        .avatar-frame {
+            width: 160px;
+            height: 160px;
+            margin: 0 auto 36px;
+            border-radius: 26px;
+            background: rgba(255, 255, 255, 0.07);
+            border: 1px solid rgba(255, 255, 255, 0.14);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 0 40px rgba(255, 159, 214, 0.18), inset 0 0 30px rgba(120, 90, 200, 0.25);
+            animation: bob 5.5s ease-in-out infinite;
+            overflow: hidden; /* Clips everything outside the rounded frame */
+            position: relative;
+        }
+
+        .avatar-frame img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transform: scale(1.65); /* Crops out the black bars and outer rounded box */
+            transform-origin: center center;
+            display: block;
+        }
+
+        @keyframes bob {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-8px); }
+        }
+
+        h1.headline {
+            font-family: 'Great Vibes', cursive;
+            font-weight: 400;
+            font-size: 68px;
+            line-height: 1.1;
+            background: linear-gradient(90deg, #f6cfe4 0%, #f3a9d6 45%, #e79be0 100%);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            margin-bottom: 28px;
+        }
+
+        p.subtext {
+            font-size: 17.5px;
+            font-weight: 500;
+            color: #c3c0e2;
+            line-height: 1.6;
+            max-width: 330px;
+            margin: 0 auto 40px;
+            transition: opacity 0.8s ease;
+        }
+        p.subtext.fading { opacity: 0; }
+
+        .cta {
+            position: relative;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            width: 100%;
+            padding: 18px 0;
+            border: none;
+            border-radius: 44px;
+            font-family: 'Quicksand', sans-serif;
+            font-size: 18px;
+            font-weight: 700;
+            color: #fff;
+            cursor: pointer;
+            background: linear-gradient(90deg, #ff8fcf 0%, #ff5da8 55%, #ff3f9b 100%);
+            box-shadow: 0 14px 34px rgba(255, 60, 150, 0.45);
+            transition: transform 0.3s ease;
+        }
+        .cta:hover { transform: translateY(-3px); }
+
+        .panel {
+            transition: opacity 0.8s ease;
+        }
+        .panel.hidden { display: none; }
+        .panel.fading { opacity: 0; }
+
+        .digits {
+            display: flex;
+            justify-content: center;
+            gap: 18px;
+            margin: 8px 0 30px;
+        }
+
+        .digit-box {
+            position: relative;
+            width: 84px;
+            height: 140px;
+            border-radius: 20px;
+            overflow: hidden;
+            background: linear-gradient(160deg, #2a2560 0%, #14113a 100%);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            box-shadow: inset 0 0 20px rgba(0,0,0,0.5), 0 10px 26px rgba(0,0,0,0.35);
+            perspective: 500px;
+        }
+
+        .digit-box::after {
+            content: "";
+            position: absolute;
+            left: 0;
+            right: 0;
+            top: 50%;
+            height: 1px;
+            background: rgba(0, 0, 0, 0.45);
+            z-index: 2;
+            pointer-events: none;
+        }
+
+        .digit-face {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 62px;
+            font-weight: 700;
+            color: #f0c66a;
+            text-shadow: 0 0 14px rgba(240, 198, 106, 0.4);
+            transform-style: preserve-3d;
+            backface-visibility: hidden;
+        }
+
+        .digit-face.flipping {
+            animation: flipTick var(--tick-dur, 220ms) cubic-bezier(.4,0,.2,1);
+        }
+
+        @keyframes flipTick {
+            0%   { transform: rotateX(0deg); }
+            48%  { transform: rotateX(-92deg); }
+            52%  { transform: rotateX(-92deg); }
+            100% { transform: rotateX(0deg); }
+        }
+
+        .hint-text {
+            font-size: 16px;
+            font-weight: 500;
+            color: #c3c0e2;
+            margin-bottom: 34px;
+            transition: opacity 0.9s ease;
+        }
+        .hint-text.fading { opacity: 0; }
+
+        .cta.secondary {
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: none;
+            opacity: 0;
+            transform: translateY(8px);
+            pointer-events: none;
+            transition: opacity 1s ease, transform 1s ease, background 0.4s ease;
+        }
+        .cta.secondary.show {
+            opacity: 1;
+            transform: translateY(0);
+            pointer-events: auto;
+        }
+        /* Style for when the button is disabled while BGM is playing */
+        .cta.secondary:disabled {
+            opacity: 0.3;
+            cursor: not-allowed;
+            transform: none !important;
+            box-shadow: none !important;
+            pointer-events: none;
+        }
+        .cta.secondary:hover {
+            background: rgba(255, 255, 255, 0.14);
+            transform: translateY(-3px);
+            box-shadow: 0 10px 24px rgba(0,0,0,0.3);
+        }
+
+        /* ---------- hanging moons & stars ---------- */
+        .sky-deco {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 220px;
+            pointer-events: none;
+            overflow: visible;
+            z-index: 1;
+        }
+
+        .hang {
+            position: absolute;
+            top: 0;
+            opacity: 0;
+            animation: dropIn 2.6s cubic-bezier(.22,1.1,.32,1) forwards;
+        }
+        .hang .swing {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            transform-origin: top center;
+            animation: sway 6.5s ease-in-out infinite;
+        }
+        .hang .string {
+            width: 1px;
+            background: rgba(255, 255, 255, 0.4);
+        }
+        .hang .glyph {
+            filter: drop-shadow(0 0 10px rgba(240, 198, 106, 0.55)) drop-shadow(0 6px 14px rgba(0,0,0,0.45));
+        }
+        @keyframes dropIn {
+            0%   { transform: translateY(-90px); opacity: 0; }
+            60%  { opacity: 1; }
+            100% { transform: translateY(0); opacity: 1; }
+        }
+        @keyframes sway {
+            0%, 100% { transform: rotate(-7deg); }
+            50% { transform: rotate(7deg); }
+        }
+
+        /* ---------- balloons ---------- */
+        .balloon-deco {
+            position: fixed;
+            bottom: -26px;
+            left: 0;
+            width: 100%;
+            height: 240px;
+            pointer-events: none;
+            overflow: visible;
+            z-index: 1;
+            display: flex;
+            align-items: flex-end;
+            justify-content: flex-start;
+        }
+
+        .balloon-wrap {
+            position: relative;
+            margin: 0 -10px;
+            opacity: 0;
+            transform: translateY(180px);
+            animation: floatUp 2.6s cubic-bezier(.22,1.1,.32,1) forwards, drift 5.5s ease-in-out infinite;
+            animation-delay: 0s, 2.6s;
+        }
+
+        .balloon {
+            position: relative;
+            border-radius: 50%;
+            box-shadow:
+                inset -12px -16px 22px rgba(0,0,0,0.22),
+                inset 10px 14px 20px rgba(255,255,255,0.22),
+                0 12px 24px rgba(0,0,0,0.3);
+        }
+
+        .balloon.gold  { background: radial-gradient(circle at 32% 28%, #ffe9bc 0%, #f3c568 42%, #c9902f 100%); }
+        .balloon.dark  { background: radial-gradient(circle at 32% 28%, #4a4d57 0%, #24262e 45%, #101116 100%); }
+
+        .balloon::after {
+            content: "";
+            position: absolute;
+            left: 50%;
+            bottom: -8px;
+            width: 12px;
+            height: 12px;
+            background: inherit;
+            filter: brightness(0.8);
+            clip-path: polygon(50% 100%, 0 0, 100% 0);
+            transform: translateX(-50%);
+        }
+
+        .balloon-wrap .string-tail {
+            position: absolute;
+            left: 50%;
+            top: 100%;
+            width: 1px;
+            height: 50px;
+            background: rgba(255, 255, 255, 0.28);
+            transform: translateX(-50%);
+        }
+
+        @keyframes floatUp {
+            0%   { transform: translateY(180px); opacity: 0; }
+            60%  { opacity: 1; }
+            100% { transform: translateY(0); opacity: 1; }
+        }
+        @keyframes drift {
+            0%, 100% { transform: translate(0, 0) rotate(-5deg); }
+            50% { transform: translate(8px, -16px) rotate(5deg); }
+        }
+    </style>
+</head>
+<body>
+
+  <!-- Audio tag without loop so 'ended' event can trigger -->
+  <audio id="page2Bgm" loop>
+      <source src="../assets/audio/page2_jonmodin.mpeg" type="audio/mpeg">
+  </audio>
+
+  <audio id="memeAudio">
+      <!-- Replace 'your_meme_audio.mp3' with your actual file name -->
+      <source src="../assets\audio\Ravi_meme.mpeg" type="audio/mpeg">
+  </audio>
+
+  <canvas id="stars"></canvas>
+  <div class="glow glow-1"></div>
+  <div class="glow glow-2"></div>
+  <div class="glow glow-3"></div>
+  <div id="sparkleLayer"></div>
+
+  <div class="sky-deco" id="skyDeco"></div>
+  <div class="balloon-deco" id="balloonDeco"></div>
+
+  <div class="stage">
+    <div class="card" id="card">
+      <div class="panel panel-intro" id="panelIntro">
+
+        <div class="avatar-frame">
+          <video autoplay muted loop playsinline style="width: 100%; height: 100%; object-fit: cover; transform: scale(1.25); transform-origin: center center;">
+              <source src="../assets/videos/page2_gif.mp4" type="video/mp4">
+          </video>
+        </div>
+
+        <h1 class="headline">Hello, Cutiepie</h1>
+        <p class="subtext" id="subtext">Today is your special day! But wait&hellip; this place is missing a little magic&hellip;</p>
+        <button class="cta" id="ctaBtn">Let's Begin <span class="heart">♥</span></button>
+      </div>
+
+      <div class="panel panel-number hidden fading" id="panelNumber">
+        <h1 class="headline">A Special Number</h1>
+        <p class="subtext" id="numberSubtext">Let's see how many wonderful years you've collected&hellip;</p>
+        <div class="digits">
+          <div class="digit-box"><div class="digit-face" id="digitTens">0</div></div>
+          <div class="digit-box"><div class="digit-face" id="digitOnes">0</div></div>
+        </div>
+        <p class="hint-text" id="hintText">Let's find out&hellip; ✨</p>
+        <!-- Continue button -->
+        <button class="cta secondary" id="continueBtn">Continue <span class="heart">→</span></button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Smooth entry fade-in
+    window.addEventListener('DOMContentLoaded', () => {
+      setTimeout(() => {
+        document.body.classList.add('loaded');
+      }, 100);
+    });
+
+    // 1. Helper function for slow audio fade-in (5 seconds)
+    function fadeInPage2Audio(audioElement, duration = 5000) {
+        audioElement.volume = 0;
+        audioElement.play().then(() => {
+            const steps = 40;
+            const stepTime = duration / steps;
+            const volumeIncrement = 0.5 / steps;
+            let currentVolume = 0;
+
+            const fadeInterval = setInterval(() => {
+                currentVolume += volumeIncrement;
+                if (currentVolume >= 0.5) {
+                    currentVolume = 0.5;
+                    clearInterval(fadeInterval);
+                }
+                audioElement.volume = currentVolume;
+            }, stepTime);
+        }).catch(error => {
+            console.log("Page 2 audio autoplay restricted:", error);
+        });
+    }
+
+    // Trigger page transition and audio fade-in on load
+    window.addEventListener('DOMContentLoaded', () => {
+      setTimeout(() => {
+        document.body.classList.add('loaded');
+
+        const page2Bgm = document.getElementById('page2Bgm');
+        const continueBtn = document.getElementById('continueBtn');
+
+        if (page2Bgm) {
+          fadeInPage2Audio(page2Bgm, 5000); 
+        }
+      }, 100);
+    });
+
+    function fadeOutPage2Audio(audioElement, callback, duration = 1500) {
+        if (!audioElement || audioElement.paused) {
+            if (callback) callback();
+            return;
+        }
+
+        const steps = 20;
+        const stepTime = duration / steps;
+        const volumeDecrement = audioElement.volume / steps;
+        
+        const fadeInterval = setInterval(() => {
+            audioElement.volume -= volumeDecrement;
+            if (audioElement.volume <= 0.05) {
+                audioElement.volume = 0;
+                audioElement.pause();
+                clearInterval(fadeInterval);
+                if (callback) callback();
+            }
+        }, stepTime);
+    }
+
+    // Handle Continue button click to swap placeholder with video
+    const continueBtn = document.getElementById('continueBtn');
+    if (continueBtn) {
+        continueBtn.addEventListener('click', () => {
+            const page2Bgm = document.getElementById('page2Bgm');
+            
+            fadeOutPage2Audio(page2Bgm, () => {
+                const card = document.getElementById('card');
+                
+                // Strips away the blue card background
+                card.classList.add('video-mode');
+                
+                // UPDATED: Added disablePictureInPicture and reduced max-width to 280px
+                card.innerHTML = `
+                    <div class="panel" style="width: 100%; display: flex; justify-content: center; align-items: center;">
+                        <video id="storyVideo" autoplay playsinline preload="auto" disablePictureInPicture controlsList="nodownload" style="width: 100%; max-width: 280px; border-radius: 24px; outline: none; box-shadow: 0 20px 60px rgba(0,0,0,0.6);">
+                            <source src="../assets/videos/cute_duck_kiss.mp4" type="video/mp4">
+                            Your browser does not support the video tag.
+                        </video>
+                    </div>
+                `;
+
+                const storyVideo = document.getElementById('storyVideo');
+                if (storyVideo) {
+                    storyVideo.volume = 1.0;
+                    storyVideo.load();
+                    storyVideo.play().catch(err => console.log("Video playback error:", err));
+
+                    // Automatically transition to Page 3 when the video ends
+                    storyVideo.onended = () => {
+                        // Fade out the body smoothly using your 1.2s transition
+                        document.body.classList.remove('loaded');
+                        
+                        // Wait for the fade-out animation to finish, then redirect
+                        setTimeout(() => {
+                            window.location.href = '../page3/page3.html';
+                        }, 1200);
+                    };
+                }
+            }, 1500);
+        });
+    }
+
+    // Twinkling starfield
+    const canvas = document.getElementById('stars');
+    const ctx = canvas.getContext('2d');
+    let stars = [];
+
+    function resize() {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+      const count = Math.floor((canvas.width * canvas.height) / 9000);
+      stars = Array.from({ length: count }, () => ({
+        x: Math.random() * canvas.width,
+        y: Math.random() * canvas.height,
+        r: Math.random() * 1.4 + 0.3,
+        phase: Math.random() * Math.PI * 2,
+        speed: 0.5 + Math.random() * 1.2
+      }));
+    }
+    window.addEventListener('resize', resize);
+    resize();
+
+    function drawStars(t) {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      for (const s of stars) {
+        const twinkle = 0.5 + 0.5 * Math.sin(t * 0.001 * s.speed + s.phase);
+        ctx.beginPath();
+        ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
+        ctx.fillStyle = `rgba(255, 255, 255, ${0.15 + twinkle * 0.55})`;
+        ctx.fill();
+      }
+      requestAnimationFrame(drawStars);
+    }
+    requestAnimationFrame(drawStars);
+
+    // Idle floating sparkle hearts
+    const sparkleLayer = document.getElementById('sparkleLayer');
+    const sparkleGlyphs = ['✦', '♥', '✧'];
+    function spawnSparkle() {
+      const el = document.createElement('span');
+      el.className = 'sparkle';
+      el.textContent = sparkleGlyphs[Math.floor(Math.random() * sparkleGlyphs.length)];
+      el.style.left = Math.random() * 100 + 'vw';
+      el.style.top = (40 + Math.random() * 50) + 'vh';
+      el.style.fontSize = (10 + Math.random() * 14) + 'px';
+      el.style.color = Math.random() > 0.5 ? 'rgba(255,180,220,0.9)' : 'rgba(230,210,255,0.85)';
+      el.style.animationDuration = (5 + Math.random() * 4) + 's';
+      sparkleLayer.appendChild(el);
+      setTimeout(() => el.remove(), 9000);
+    }
+    setInterval(spawnSparkle, 900);
+    for (let i = 0; i < 6; i++) setTimeout(spawnSparkle, i * 300);
+
+    // Step transition: moons/stars + balloons
+    const messages = [
+      "Today is your special day! But wait\u2026 this place is missing a little magic\u2026",
+      "Perfect! A special little place, made just for you."
+    ];
+    let step = 0;
+
+    const subtext = document.getElementById('subtext');
+    const ctaBtn = document.getElementById('ctaBtn');
+    const skyDeco = document.getElementById('skyDeco');
+    const balloonDeco = document.getElementById('balloonDeco');
+
+    const skyItems = [
+      { type: 'moon', left: '-2%', size: 84, stringH: 70,  delay: 0    },
+      { type: 'star', left: '14%', size: 40, stringH: 130, delay: 0.26 },
+      { type: 'star', left: '30%', size: 30, stringH: 60,  delay: 0.52 },
+      { type: 'star', left: '47%', size: 34, stringH: 150, delay: 0.78 },
+      { type: 'star', left: '64%', size: 46, stringH: 90,  delay: 1.04 },
+      { type: 'star', left: '80%', size: 30, stringH: 130, delay: 1.3  },
+      { type: 'moon', left: '94%', size: 70, stringH: 40,  delay: 1.56 },
+    ];
+
+    const moonSVG = (size) => `
+      <svg class="glyph" width="${size}" height="${size}" viewBox="0 0 24 24" fill="none">
+        <path d="M20 14.5A8.5 8.5 0 1 1 9.5 4a7 7 0 0 0 10.5 10.5Z" fill="#f0c66a" stroke="#e0b24f" stroke-width="0.5"/>
+      </svg>`;
+    const starSVG = (size) => `
+      <svg class="glyph" width="${size}" height="${size}" viewBox="0 0 24 24" fill="none">
+        <path d="M12 2l2.6 6.6L21 11l-6.4 2.4L12 20l-2.6-6.6L3 11l6.4-2.4L12 2z" fill="#f0c66a" stroke="#e0b24f" stroke-width="0.5"/>
+      </svg>`;
+
+    function buildSky() {
+      skyDeco.innerHTML = skyItems.map((item, i) => {
+        const swayDur = (5.5 + (i % 3) * 1.1).toFixed(2);
+        return `
+        <div class="hang" style="left:${item.left}; animation-delay:${item.delay}s;">
+          <div class="swing" style="animation-duration:${swayDur}s; animation-delay:${item.delay}s;">
+            <div class="string" style="height:${item.stringH}px;"></div>
+            ${item.type === 'moon' ? moonSVG(item.size) : starSVG(item.size)}
+          </div>
+        </div>
+      `;
+      }).join('');
+    }
+
+    function buildBalloons() {
+      const sizePattern = [82, 100, 92, 112, 96, 88, 106, 84, 98, 90];
+      const avgStep = 78;
+      const viewportW = window.innerWidth;
+      const count = Math.ceil(viewportW / avgStep) + 4;
+
+      const balloons = Array.from({ length: count }, (_, i) => ({
+        c: i % 2 === 0 ? 'gold' : 'dark',
+        size: sizePattern[i % sizePattern.length]
+      }));
+
+      const rowWidth = count * avgStep;
+      const startOffset = (viewportW - rowWidth) / 2;
+
+      balloonDeco.style.paddingLeft = startOffset + 'px';
+
+      balloonDeco.innerHTML = balloons.map((b, i) => {
+        const driftDur = (4.6 + (i % 4) * 0.6).toFixed(2);
+        return `
+        <div class="balloon-wrap" style="animation-delay:${i * 0.14}s, ${2.6 + i * 0.14}s; animation-duration: 2.6s, ${driftDur}s;">
+          <div class="balloon ${b.c}" style="width:${b.size}px; height:${b.size}px;"></div>
+          <div class="string-tail"></div>
+        </div>
+      `;
+      }).join('');
+    }
+
+    ctaBtn.addEventListener('click', () => {
+      if (step === 0) {
+        step = 1;
+        subtext.classList.add('fading');
+        setTimeout(() => {
+          subtext.textContent = messages[1];
+          subtext.classList.remove('fading');
+        }, 1100);
+        buildSky();
+        buildBalloons();
+      } else if (step === 1) {
+        step = 2;
+        
+        // Play the meme audio
+        const memeAudio = document.getElementById('memeAudio');
+        if (memeAudio) {
+            memeAudio.play().catch(err => console.log("Meme audio error:", err));
+        }
+        
+        goToNumberPanel();
+      }
+    });
+
+    // Number reveal panel & flip animation logic
+    const AGE = 25;
+    const panelIntro = document.getElementById('panelIntro');
+    const panelNumber = document.getElementById('panelNumber');
+    const digitTens = document.getElementById('digitTens');
+    const digitOnes = document.getElementById('digitOnes');
+    const hintText = document.getElementById('hintText');
+
+    function runFlipSequence(el, values, durations, idx, onComplete) {
+      if (idx >= values.length) {
+        onComplete && onComplete();
+        return;
+      }
+      const dur = durations[idx];
+      el.style.setProperty('--tick-dur', dur + 'ms');
+      el.classList.remove('flipping');
+      void el.offsetWidth;
+      el.classList.add('flipping');
+
+      setTimeout(() => {
+        el.textContent = values[idx];
+      }, dur / 2);
+
+      setTimeout(() => {
+        runFlipSequence(el, values, durations, idx + 1, onComplete);
+      }, dur);
+    }
+
+    function flipDigitTo(el, targetDigit, loops, minDur, maxDur, power, onComplete) {
+      const N = loops * 10 + targetDigit;
+      const values = [];
+      const durations = [];
+      for (let i = 0; i < N; i++) {
+        values.push((i + 1) % 10);
+        const t = N > 1 ? i / (N - 1) : 1;
+        durations.push(Math.round(minDur + (maxDur - minDur) * Math.pow(t, power)));
+      }
+      el.textContent = '0';
+      runFlipSequence(el, values, durations, 0, onComplete);
+    }
+
+    function goToNumberPanel() {
+      panelIntro.classList.add('fading');
+      setTimeout(() => {
+        panelIntro.classList.add('hidden');
+        panelNumber.classList.remove('hidden');
+        requestAnimationFrame(() => panelNumber.classList.remove('fading'));
+
+        const tens = Math.floor(AGE / 10);
+        const ones = AGE % 10;
+
+        let doneCount = 0;
+        const bothDone = () => {
+          doneCount++;
+          if (doneCount < 2) return;
+          setTimeout(() => {
+            hintText.classList.add('fading');
+            setTimeout(() => {
+              hintText.textContent = `${AGE} years of smiles, memories, and beautiful moments ❤️`;
+              hintText.classList.remove('fading');
+              
+              // Show the continue button immediately after the flip animation completes
+              continueBtn.classList.add('show');
+            }, 900);
+          }, 400);
+        };
+
+        setTimeout(() => {
+          flipDigitTo(digitTens, tens, 2, 55, 620, 4, bothDone);
+        }, 300);
+        setTimeout(() => {
+          flipDigitTo(digitOnes, ones, 2, 55, 700, 4, bothDone);
+        }, 550);
+      }, 900);
+    }
+  </script>
+</body>
+</html>

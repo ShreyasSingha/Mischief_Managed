@@ -1,0 +1,203 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    background-color: #fff0f3; /* Change this hex code to your favorite choice */
+    font-family: 'Poppins', sans-serif;
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    overflow: hidden;
+    position: relative;
+}
+
+/* Small Audio Toggle Button (Top Right Corner) */
+.audio-toggle-btn {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    background-color: #ffffff;
+    border: 2px solid #ff3366;
+    color: #ff3366;
+    font-size: 1.2rem;
+    width: 45px;
+    height: 45px;
+    border-radius: 50%;
+    cursor: pointer;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
+    z-index: 100;
+    transition: transform 0.2s ease, background-color 0.2s ease;
+}
+
+.audio-toggle-btn:hover {
+    background-color: #fff0f3;
+    transform: scale(1.08);
+}
+
+.main-card {
+    text-align: center;
+    z-index: 10;
+    padding: 20px;
+    width: 100%;
+    max-width: 700px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+/* Larger Title Font */
+.title {
+    font-family: 'Dancing Script', cursive;
+    font-size: 4.8rem;
+    color: #ff3366;
+    margin-bottom: 12px;
+    font-weight: 700;
+    white-space: nowrap;
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.heart {
+    font-size: 3.6rem;
+}
+
+.illustration-container {
+    width: 310px;
+    height: 310px;
+    margin: 0 auto 15px auto;
+    border-radius: 20px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    overflow: hidden;
+}
+
+.birthday-gif {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    /* New animation properties */
+    opacity: 0;
+    transform: scale(0.8);
+    animation: fadeInZoom 1.5s ease-out forwards;
+}
+
+/* Add the keyframes right below it */
+@keyframes fadeInZoom {
+    0% {
+        opacity: 0;
+        transform: scale(0.8);
+    }
+    100% {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+/* Subtitle / Description Text */
+.description {
+    font-family: 'Dancing Script', cursive;
+    font-size: 1.5rem; /* <-- Change this value here */
+    color: #444;
+    line-height: 1.3;
+    max-width: 540px;
+    margin: 0 auto 35px auto;
+    font-weight: 700;
+}
+
+.btn-group {
+    display: flex;
+    justify-content: center;
+    gap: 30px;
+    position: relative;
+    width: 100%;
+}
+
+/* Larger Buttons */
+.btn {
+    padding: 16px 60px;
+    font-size: 1.4rem;
+    font-weight: 600;
+    border: none;
+    border-radius: 35px;
+    cursor: pointer;
+    transition: transform 0.2s ease, background-color 0.2s ease;
+    box-shadow: 0 6px 15px rgba(255, 51, 102, 0.2);
+}
+
+.yes-btn {
+    background-color: #ff3366;
+    color: white;
+}
+
+.yes-btn:hover {
+    background-color: #e60039;
+    transform: scale(1.06);
+}
+
+/* No button with slow, feather-like gliding transition */
+.no-btn {
+    background-color: #ffffff;
+    color: #ff3366;
+    border: 2px solid #ff3366;
+    position: relative;
+    transition: left 0.8s cubic-bezier(0.25, 1, 0.5, 1), top 0.8s cubic-bezier(0.25, 1, 0.5, 1), background-color 0.2s ease;
+}
+
+.no-btn:hover {
+    background-color: #fff0f3;
+}
+
+/* Sprinkle Animation Container */
+.confetti-container {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    overflow: hidden;
+    z-index: 1;
+}
+
+.particle {
+    position: absolute;
+    opacity: 0.8;
+    animation: fall linear infinite;
+}
+
+@keyframes fall {
+    0% {
+        transform: translateY(-30px) rotate(0deg);
+    }
+    100% {
+        transform: translateY(105vh) rotate(360deg);
+    }
+}
+
+/* Cinematic Fade Transition Overlay */
+.transition-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: #06051a; /* Matches Page 2's dark space background */
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 1.2s ease-in-out;
+    z-index: 9999;
+}
+
+.transition-overlay.active {
+    opacity: 1;
+    pointer-events: auto;
+}

@@ -1,0 +1,561 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Make a Wish — for Sreeja</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;0,700;1,500&family=Caveat:wght@500;600&family=Quicksand:wght@400;500;600&display=swap');
+
+  :root{
+    --bg-1: #fff5f7;
+    --bg-2: #ffe9ef;
+    --rose: #e8437a;
+    --rose-deep: #c72a5e;
+    --plum: #8a4a6b;
+    --ink: #4a3245;
+  }
+
+  *{ box-sizing: border-box; }
+
+  html, body{
+    margin: 0; padding: 0;
+    width: 100vw; height: 100vh;
+    overflow: hidden;
+    font-family: 'Quicksand', sans-serif;
+    color: var(--ink);
+    background: radial-gradient(circle at 30% 20%, #fff9fa 0%, var(--bg-1) 45%, var(--bg-2) 100%);
+  }
+
+  body.page-fade-in{
+    animation: pageFadeIn 1.2s ease-in-out forwards;
+  }
+
+  @keyframes pageFadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+
+  /* ---------- Twinkling & Floating Stars Animation ---------- */
+  #sparkles{
+    position: fixed; inset: 0;
+    z-index: 1;
+    pointer-events: none;
+    overflow: hidden;
+  }
+  .star {
+    position: absolute;
+    color: #ffb7c5;
+    font-size: 14px;
+    user-select: none;
+    animation: starFloatTwinkle ease-in-out infinite;
+    will-change: transform, opacity;
+    text-shadow: 0 0 8px rgba(255, 183, 197, 0.8), 0 0 15px rgba(232, 67, 122, 0.5);
+  }
+  @keyframes starFloatTwinkle {
+    0%   { transform: translateY(40px) scale(0.4) rotate(0deg); opacity: 0; }
+    30%  { opacity: 1; transform: translateY(-30px) scale(1.2) rotate(30deg); }
+    70%  { opacity: 0.8; transform: translateY(-100px) scale(0.9) rotate(60deg); }
+    100% { transform: translateY(-180px) scale(0.3) rotate(120deg); opacity: 0; }
+  }
+
+  /* ---------- Layout (Fit & Scaled Up) ---------- */
+  .stage{
+    position: relative;
+    z-index: 2;
+    width: 100vw;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+  }
+
+  .topbar{
+    position: fixed; top: 20px; left: 20px; right: 20px;
+    display: flex; justify-content: space-between;
+    z-index: 20;
+  }
+  .icon-btn{
+    width: 46px; height: 46px; border-radius: 50%;
+    background: rgba(255,255,255,0.9);
+    border: none;
+    display: flex; align-items: center; justify-content: center;
+    box-shadow: 0 4px 16px rgba(199,42,94,0.18);
+    cursor: pointer;
+    font-size: 20px;
+    color: var(--plum);
+    transition: transform 0.25s ease, box-shadow 0.25s ease;
+  }
+  .icon-btn:hover{ transform: translateY(-2px); box-shadow: 0 8px 20px rgba(199,42,94,0.25); }
+  .icon-btn.hidden-btn{ display: none; }
+
+  .arrow-btn{
+    background: none;
+    border: none;
+    padding: 4px;
+    font-size: 1.9rem;
+    line-height: 1;
+    color: #f472b6;
+    cursor: pointer;
+    transition: transform 0.2s ease;
+  }
+  .arrow-btn:hover{ transform: scale(1.25); }
+
+  .heading-block{
+    text-align: center;
+    max-width: 850px;
+    margin-bottom: 12px;
+  }
+  h1{
+    font-family: 'Playfair Display', serif;
+    font-style: italic;
+    font-weight: 700;
+    font-size: clamp(2.6rem, 5.8vh, 4.2rem);
+    color: var(--rose);
+    margin: 0 0 6px;
+    display: flex; align-items: center; justify-content: center; gap: 14px; flex-wrap: wrap;
+  }
+  .hearts{ display: inline-flex; align-items: flex-end; gap: 2px; font-style: normal; }
+  .hearts span{ display: inline-block; animation: heartPulse 1.6s ease-in-out infinite; }
+  .hearts span:nth-child(1){ font-size: 1.6rem; animation-delay: 0.2s; }
+  .hearts span:nth-child(2){ font-size: 2rem; animation-delay: 0s; transform: translateY(-4px); }
+  @keyframes heartPulse{
+    0%, 100%{ transform: scale(1); }
+    50%{ transform: scale(1.15); }
+  }
+  .subline{
+    font-family: 'Caveat', cursive;
+    font-size: clamp(1.5rem, 3vh, 2rem);
+    color: var(--rose);
+    margin: 0;
+  }
+
+  /* ---------- Scaled Up Cake Component ---------- */
+  .cake-zone{
+    position: relative;
+    width: 100%;
+    max-width: 520px;
+    margin: 10px 0;
+  }
+
+  .float-wrap{
+    animation: cakeFloat 5s ease-in-out infinite;
+    transform-origin: 50% 100%;
+  }
+  @keyframes cakeFloat{
+    0%, 100%{ transform: translateY(0); }
+    50%{ transform: translateY(-12px); }
+  }
+
+  .cake-svg{ width: 100%; height: auto; max-height: 52vh; display: block; filter: drop-shadow(0 26px 24px rgba(150, 60, 100, 0.25)); }
+
+  .flame-group{ cursor: pointer; }
+  .flame{
+    transform-box: fill-box;
+    transform-origin: 50% 100%;
+  }
+  .flame-outer.lit{ animation: flickerOuter 1.1s ease-in-out infinite; }
+  .flame-inner.lit{ animation: flickerInner 0.9s ease-in-out infinite; }
+
+  .fl-1 .flame-outer.lit{ animation-duration: 1.05s; animation-delay: -0.1s; }
+  .fl-2 .flame-outer.lit{ animation-duration: 1.2s;  animation-delay: -0.4s; }
+  .fl-3 .flame-outer.lit{ animation-duration: 0.95s; animation-delay: -0.65s; }
+  .fl-4 .flame-outer.lit{ animation-duration: 1.15s; animation-delay: -0.2s; }
+  .fl-5 .flame-outer.lit{ animation-duration: 1.0s;  animation-delay: -0.5s; }
+
+  @keyframes flickerOuter{
+    0%,100%{ transform: translateX(0) scale(1,1) rotate(-2.5deg); }
+    18%{     transform: translateX(1.2px) scale(0.92,1.08) rotate(1.5deg); }
+    36%{     transform: translateX(-1px) scale(1.06,0.94) rotate(-3deg); }
+    54%{     transform: translateX(0.6px) scale(0.96,1.05) rotate(2.5deg); }
+    72%{     transform: translateX(-1.3px) scale(1.04,0.96) rotate(-1.5deg); }
+    90%{     transform: translateX(0.4px) scale(0.98,1.03) rotate(1deg); }
+  }
+  @keyframes flickerInner{
+    0%,100%{ transform: scale(1,1) translateY(0); }
+    50%{ transform: scale(0.85,1.12) translateY(-1px); }
+  }
+
+  .flame-outer.out, .flame-inner.out{
+    animation: none;
+    opacity: 0;
+    transform: scale(0.3);
+    transition: opacity 0.25s ease, transform 0.25s ease;
+  }
+
+  .hit-area{ fill: transparent; cursor: pointer; }
+
+  .flame-glow{
+    opacity: 0.65;
+    animation: glowPulse 1.4s ease-in-out infinite;
+    transition: opacity 0.2s ease;
+    pointer-events: none;
+  }
+  @keyframes glowPulse{
+    0%,100%{ opacity: 0.5; transform: scale(1); }
+    50%{ opacity: 0.8; transform: scale(1.15); }
+  }
+  .flame-glow.out{ opacity: 0; animation: none; }
+
+  .hint{
+    font-family: 'Caveat', cursive;
+    font-size: 1.6rem;
+    color: var(--plum);
+    text-align: center;
+    margin-top: 10px;
+    min-height: 1.5em;
+  }
+
+  .continue-btn{
+    margin-top: 16px;
+    padding: 14px 44px;
+    border: none;
+    border-radius: 999px;
+    background: linear-gradient(135deg, var(--rose), var(--rose-deep));
+    color: #fff;
+    font-family: 'Quicksand', sans-serif;
+    font-weight: 600;
+    font-size: 1.15rem;
+    cursor: pointer;
+    box-shadow: 0 12px 24px rgba(199, 42, 94, 0.32);
+    transition: transform 0.2s ease, box-shadow 0.2s ease, opacity 0.3s ease;
+    opacity: 0.45;
+    pointer-events: none;
+  }
+  .continue-btn.ready{
+    opacity: 1;
+    pointer-events: auto;
+    animation: readyPulse 1.8s ease-in-out infinite;
+  }
+  .continue-btn:hover{ transform: translateY(-3px); box-shadow: 0 16px 32px rgba(199, 42, 94, 0.42); }
+  @keyframes readyPulse{
+    0%, 100%{ box-shadow: 0 12px 24px rgba(199, 42, 94, 0.32); }
+    50%{ box-shadow: 0 16px 36px rgba(199, 42, 94, 0.52); }
+  }
+
+  .toast{
+    position: fixed;
+    bottom: 34px; left: 50%;
+    transform: translateX(-50%) translateY(20px);
+    background: var(--ink);
+    color: #fff;
+    padding: 12px 22px;
+    border-radius: 14px;
+    font-size: 0.95rem;
+    opacity: 0;
+    transition: opacity 0.35s ease, transform 0.35s ease;
+    pointer-events: none;
+    z-index: 300;
+  }
+  .toast.show{ opacity: 1; transform: translateX(-50%) translateY(0); }
+</style>
+</head>
+<body class="page-fade-in">
+
+<!-- Background Music Carried Over -->
+<audio id="bgm" src="../assets/audio/page3_bgm.mpeg" preload="auto" loop></audio>
+
+<!-- Custom Celebration Audio File (Triggered when last candle is blown) -->
+<audio id="celebrationAudio" src="../assets/audio/cheers.mpeg" preload="auto"></audio>
+
+<!-- Floating & Twinkling Stars Background Container -->
+<div id="sparkles"></div>
+
+<div class="topbar">
+  <button class="arrow-btn" id="backBtn" aria-label="Go back">&#8592;</button>
+  <button class="icon-btn hidden-btn" id="muteBtn" aria-label="Toggle sound">&#128266;</button>
+</div>
+
+<div class="stage" id="stage">
+  <div class="heading-block">
+    <h1>Make a wish, Sreeja&hellip;
+      <span class="hearts"><span>&#128153;</span><span>&#10084;&#65039;</span></span>
+    </h1>
+    <p class="subline">Because a heart as beautiful as yours deserves everything it asks for.</p>
+  </div>
+
+  <div class="cake-zone">
+    <div class="float-wrap">
+      <svg class="cake-svg" viewBox="0 0 400 470" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <radialGradient id="tier1" cx="35%" cy="18%" r="95%">
+            <stop offset="0%" stop-color="#f7cdea"/><stop offset="45%" stop-color="#e0aee6"/><stop offset="100%" stop-color="#a97fd6"/>
+          </radialGradient>
+          <radialGradient id="tier2" cx="35%" cy="18%" r="95%">
+            <stop offset="0%" stop-color="#ffd9e7"/><stop offset="55%" stop-color="#f4aec9"/><stop offset="100%" stop-color="#e386ab"/>
+          </radialGradient>
+          <radialGradient id="tier3" cx="35%" cy="18%" r="95%">
+            <stop offset="0%" stop-color="#ffe3ef"/><stop offset="55%" stop-color="#f6bdd6"/><stop offset="100%" stop-color="#e592b8"/>
+          </radialGradient>
+          <linearGradient id="boardGrad" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stop-color="#5a3524"/><stop offset="100%" stop-color="#33190f"/>
+          </linearGradient>
+          <radialGradient id="flameCore" cx="50%" cy="80%" r="75%">
+            <stop offset="0%" stop-color="#fff8d8"/><stop offset="40%" stop-color="#ffcf5c"/><stop offset="75%" stop-color="#ff9a3c"/><stop offset="100%" stop-color="#e8531f"/>
+          </radialGradient>
+          <radialGradient id="flameBase" cx="50%" cy="90%" r="80%">
+            <stop offset="0%" stop-color="#eaf6ff"/><stop offset="55%" stop-color="#9fd4ff"/><stop offset="100%" stop-color="#9fd4ff" stop-opacity="0"/>
+          </radialGradient>
+          <radialGradient id="glowGrad" cx="50%" cy="50%" r="50%">
+            <stop offset="0%" stop-color="#ffdf8a" stop-opacity="0.9"/><stop offset="100%" stop-color="#ffdf8a" stop-opacity="0"/>
+          </radialGradient>
+        </defs>
+
+        <ellipse cx="200" cy="438" rx="150" ry="17" fill="url(#boardGrad)"/>
+        <ellipse cx="200" cy="431" rx="150" ry="14" fill="#6b4130"/>
+
+        <!-- TIER 3 -->
+        <rect x="70" y="345" width="260" height="78" fill="url(#tier3)"/>
+        <ellipse cx="200" cy="423" rx="130" ry="15" fill="#df8bae"/>
+        <ellipse cx="200" cy="345" rx="130" ry="18" fill="url(#tier3)"/>
+        <rect x="70" y="356" width="260" height="13" fill="#93c9e8"/>
+
+        <!-- TIER 2 -->
+        <rect x="105" y="258" width="190" height="87" fill="url(#tier2)"/>
+        <ellipse cx="200" cy="345" rx="95" ry="14" fill="#df8bae"/>
+        <ellipse cx="200" cy="258" rx="95" ry="16" fill="url(#tier2)"/>
+        <rect x="105" y="270" width="190" height="9" fill="#93c9e8"/>
+
+        <!-- TIER 1 -->
+        <rect x="120" y="190" width="160" height="70" fill="url(#tier1)"/>
+        <ellipse cx="200" cy="260" rx="80" ry="12" fill="#b070c4"/>
+        <ellipse cx="200" cy="190" rx="80" ry="14" fill="url(#tier1)"/>
+
+        <!-- CANDLES -->
+        <g class="fl-1">
+          <rect x="140" y="146" width="8" height="45" rx="3" fill="#ffb64c"/>
+          <circle class="flame-glow" cx="144" cy="128" r="20" fill="url(#glowGrad)"/>
+          <g class="flame-group" data-flame="1">
+            <path class="flame flame-inner lit" d="M144 122 C141 126 141 130 144 133 C147 130 147 126 144 122 Z" fill="url(#flameBase)"/>
+            <path class="flame flame-outer lit" d="M144 110 C137 118 137 128 144 134 C151 128 151 118 144 110 Z" fill="url(#flameCore)"/>
+            <circle class="hit-area" data-idx="1" cx="144" cy="122" r="22"/>
+          </g>
+        </g>
+        <g class="fl-2">
+          <rect x="168" y="134" width="8" height="57" rx="3" fill="#6fcbb8"/>
+          <circle class="flame-glow" cx="172" cy="116" r="20" fill="url(#glowGrad)"/>
+          <g class="flame-group" data-flame="2">
+            <path class="flame flame-inner lit" d="M172 110 C169 114 169 118 172 121 C175 118 175 114 172 110 Z" fill="url(#flameBase)"/>
+            <path class="flame flame-outer lit" d="M172 98 C165 106 165 116 172 122 C179 116 179 106 172 98 Z" fill="url(#flameCore)"/>
+            <circle class="hit-area" data-idx="2" cx="172" cy="110" r="22"/>
+          </g>
+        </g>
+        <g class="fl-3">
+          <rect x="196" y="128" width="8" height="63" rx="3" fill="#ff6f9e"/>
+          <circle class="flame-glow" cx="200" cy="110" r="21" fill="url(#glowGrad)"/>
+          <g class="flame-group" data-flame="3">
+            <path class="flame flame-inner lit" d="M200 104 C197 108 197 112 200 115 C203 112 203 108 200 104 Z" fill="url(#flameBase)"/>
+            <path class="flame flame-outer lit" d="M200 91 C193 99 193 110 200 116 C207 110 207 99 200 91 Z" fill="url(#flameCore)"/>
+            <circle class="hit-area" data-idx="3" cx="200" cy="104" r="23"/>
+          </g>
+        </g>
+        <g class="fl-4">
+          <rect x="224" y="134" width="8" height="57" rx="3" fill="#b98ae0"/>
+          <circle class="flame-glow" cx="228" cy="116" r="20" fill="url(#glowGrad)"/>
+          <g class="flame-group" data-flame="4">
+            <path class="flame flame-inner lit" d="M228 110 C225 114 225 118 228 121 C231 118 231 114 228 110 Z" fill="url(#flameBase)"/>
+            <path class="flame flame-outer lit" d="M228 98 C221 106 221 116 228 122 C235 116 235 106 228 98 Z" fill="url(#flameCore)"/>
+            <circle class="hit-area" data-idx="4" cx="228" cy="110" r="22"/>
+          </g>
+        </g>
+        <g class="fl-5">
+          <rect x="252" y="146" width="8" height="45" rx="3" fill="#fbf2d9"/>
+          <circle class="flame-glow" cx="256" cy="128" r="20" fill="url(#glowGrad)"/>
+          <g class="flame-group" data-flame="5">
+            <path class="flame flame-inner lit" d="M256 122 C253 126 253 130 256 133 C259 130 259 126 256 122 Z" fill="url(#flameBase)"/>
+            <path class="flame flame-outer lit" d="M256 110 C249 118 249 128 256 134 C263 128 263 118 256 110 Z" fill="url(#flameCore)"/>
+            <circle class="hit-area" data-idx="5" cx="256" cy="122" r="22"/>
+          </g>
+        </g>
+      </svg>
+    </div>
+  </div>
+
+  <p class="hint" id="hint">Gently tap each flame to send your wish to the stars ✨</p>
+  <button class="continue-btn" id="continueBtn">Continue →</button>
+</div>
+
+<div class="toast" id="toast">Your wish has been sent, Sreeja ✨</div>
+
+<script>
+
+  const bgm = document.getElementById('bgm');
+  const celebrationAudio = document.getElementById('celebrationAudio');
+
+  // Pick up the music seamlessly from Page 3
+  window.addEventListener('load', () => {
+    const savedTime = localStorage.getItem('bgmCurrentTime');
+    const isPlaying = localStorage.getItem('bgmPlaying') === 'true';
+
+    if (savedTime) {
+      bgm.currentTime = parseFloat(savedTime);
+    }
+    if (isPlaying) {
+      bgm.volume = 0.5;
+      bgm.play().catch(() => {});
+    }
+  });
+
+  // When clicking Continue on Page 4 to go to Page 5 -> Fade out background music and stop
+  document.getElementById('continueBtn').addEventListener('click', () => {
+    localStorage.removeItem('bgmPlaying');
+    localStorage.removeItem('bgmCurrentTime');
+
+    // Smooth volume fade-out over 1.2 seconds for background music
+    let vol = bgm.volume;
+    let fadeInterval = setInterval(() => {
+      if (vol > 0.05) {
+        vol -= 0.05;
+        bgm.volume = vol;
+      } else {
+        bgm.volume = 0;
+        bgm.pause();
+        clearInterval(fadeInterval);
+      }
+    }, 50);
+
+    // Redirect to Page 5 after the fade finishes
+    setTimeout(() => {
+      window.location.href = '../page5/page5.html';
+    }, 1200);
+  });
+
+  // ---------- Smooth Entry Fade-in ----------
+  document.addEventListener('DOMContentLoaded', () => {
+    setTimeout(() => {
+      document.body.classList.add('loaded');
+    }, 50);
+  });
+
+  // ---------- Twinkling & Floating Stars Generator ----------
+  (function initStars(){
+    const container = document.getElementById('sparkles');
+    const count = 40;
+    const colors = ['#e8437a', '#ffb7c5', '#ffd166', '#ffffff', '#b28dff'];
+
+    for (let i = 0; i < count; i++) {
+      const star = document.createElement('div');
+      star.className = 'star';
+      star.innerHTML = '★';
+      
+      star.style.left = (Math.random() * 100) + 'vw';
+      star.style.top = (Math.random() * 100) + 'vh';
+      star.style.color = colors[Math.floor(Math.random() * colors.length)];
+      star.style.fontSize = (12 + Math.random() * 16) + 'px';
+      
+      star.style.animationDuration = (2.5 + Math.random() * 3.5) + 's';
+      star.style.animationDelay = (Math.random() * 3) + 's';
+      
+      container.appendChild(star);
+    }
+  })();
+
+  // ---------- Back Button Functionality ----------
+  document.getElementById('backBtn').addEventListener('click', () => {
+    window.location.href = '../page3/page3.html';
+  });
+
+  // ---------- Sound & Interactions ----------
+  let muted = false;
+
+  function playBlowSound(){
+    if (muted) return;
+    // Uses browser audio context for candle blow wind sound
+    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    if (audioCtx.state === 'suspended') audioCtx.resume();
+    const now = audioCtx.currentTime;
+    const duration = 0.38;
+    const bufferSize = Math.floor(audioCtx.sampleRate * duration);
+    const buffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
+    const data = buffer.getChannelData(0);
+    for (let i = 0; i < bufferSize; i++) {
+      const t = i / bufferSize;
+      data[i] = (Math.random() * 2 - 1) * Math.pow(1 - t, 1.6);
+    }
+    const noise = audioCtx.createBufferSource();
+    noise.buffer = buffer;
+    const filter = audioCtx.createBiquadFilter();
+    filter.type = 'lowpass';
+    filter.frequency.setValueAtTime(1800, now);
+    filter.frequency.exponentialRampToValueAtTime(250, now + duration);
+    const gain = audioCtx.createGain();
+    gain.gain.setValueAtTime(0.001, now);
+    gain.gain.exponentialRampToValueAtTime(0.55, now + 0.03);
+    gain.gain.exponentialRampToValueAtTime(0.001, now + duration);
+    noise.connect(filter).connect(gain).connect(audioCtx.destination);
+    noise.start(now);
+    noise.stop(now + duration + 0.05);
+  }
+
+  // Plays your custom celebration audio file when the last candle is blown
+  function playCelebrationAudio(){
+    if (muted) return;
+    celebrationAudio.volume = 1.0;
+    celebrationAudio.currentTime = 0;
+    celebrationAudio.play().catch(err => console.log("Celebration audio play blocked:", err));
+  }
+
+  const total = 5;
+  let blown = 0;
+  const hint = document.getElementById('hint');
+  const continueBtn = document.getElementById('continueBtn');
+  const toast = document.getElementById('toast');
+
+  document.querySelectorAll('.hit-area').forEach(hit => {
+    hit.addEventListener('click', () => {
+      const group = hit.closest('.flame-group');
+      const outer = group.querySelector('.flame-outer');
+      const inner = group.querySelector('.flame-inner');
+      const glow = group.parentElement.querySelector('.flame-glow');
+      if (!outer || outer.classList.contains('out')) return;
+
+      playBlowSound();
+      outer.classList.remove('lit'); outer.classList.add('out');
+      inner.classList.remove('lit'); inner.classList.add('out');
+      if (glow) glow.classList.add('out');
+
+      blown++;
+      if (blown < total){
+        hint.textContent = `${total - blown} candle${total - blown === 1 ? '' : 's'} left to blow out`;
+      } else {
+        hint.textContent = "Wish made! ✨";
+        continueBtn.classList.add('ready');
+        setTimeout(playCelebrationAudio, 250); // <--- Triggers your custom audio here!
+      }
+    });
+  });
+
+  const muteBtn = document.getElementById('muteBtn');
+  muteBtn.addEventListener('click', () => {
+    muted = !muted;
+    muteBtn.innerHTML = muted ? '&#128264;' : '&#128266;';
+    bgm.muted = muted;
+    celebrationAudio.muted = muted;
+  });
+
+  // ---------- Reset & Replay Fade-in when returning from Page 5 ----------
+  window.addEventListener('pageshow', (event) => {
+    // If restored from bfcache (e.g. browser Back from Page 5), reset the wish state
+    if (event.persisted) {
+      document.querySelectorAll('.flame-outer, .flame-inner').forEach(el => {
+        el.classList.remove('out');
+        el.classList.add('lit');
+      });
+      document.querySelectorAll('.flame-glow').forEach(el => el.classList.remove('out'));
+      blown = 0;
+      hint.textContent = 'Tap each flame to blow out your candles';
+      continueBtn.classList.remove('ready');
+      toast.classList.remove('show');
+    }
+
+    // Always replay the fade-in animation from the beginning
+    document.body.classList.remove('page-fade-in');
+    void document.body.offsetWidth; // force reflow so the animation restarts
+    document.body.classList.add('page-fade-in');
+  });
+</script>
+
+</body>
+</html>
